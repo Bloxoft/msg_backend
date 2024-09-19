@@ -1,4 +1,4 @@
-import { ConfigService } from "@nestjs/config";
+import { CLOUDINARY_CONFIG } from "src/config/env.config";
 
 const streamifier = require('streamifier');
 
@@ -14,7 +14,7 @@ function generateThumbnail(url: string): string {
     return base + 'jpg';
 }
 
-interface DataToPush {
+export interface DataToPush {
     link: string;
     index: number;
     thumbnail?: string;
@@ -22,11 +22,7 @@ interface DataToPush {
 
 export class UploadMediaService {
     async uploadMedia(files: Array<Express.Multer.File>, id: string, category: string, addWatermark = true) {
-        cloudinary.config({
-            cloud_name: new ConfigService().get('CLOUDINARY_API_NAME'),
-            api_key: new ConfigService().get('CLOUDINARY_API_KEY'),
-            api_secret: new ConfigService().get('CLOUDINARY_API_SECRET'),
-        });
+        cloudinary.config(CLOUDINARY_CONFIG);
 
 
         if (files) {
@@ -93,6 +89,7 @@ export class UploadMediaService {
 
 
                     } catch (error) {
+                        console.log('error here')
                         console.log(error)
                     }
                 }
