@@ -1,16 +1,18 @@
 import { Module } from '@nestjs/common';
 import { UserModule } from './user/user.module';
-import { AuthModule } from './auth/auth.module';
 import { UtilityModule } from './utility/utility.module';
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { ExceptionsFilter } from '../common/filters/all-exceptions.filter';
 import { ResponseInterceptor } from '../common/interceptors/response.interceptor';
+import { AuthenticationModule } from './authentication/authentication.module';
+import { OtpModule } from './otp/otp.module';
 
 @Module({
     imports: [
         UserModule,
-        AuthModule,
         UtilityModule,
+        AuthenticationModule,
+        OtpModule,
     ],
     providers: [
         {
