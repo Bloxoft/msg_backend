@@ -1,3 +1,0 @@
-enum ProcessType {
-    Auth = "auth"
-}

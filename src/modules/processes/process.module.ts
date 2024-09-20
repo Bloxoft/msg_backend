@@ -1,9 +1,10 @@
 import { Module } from '@nestjs/common';
-import { OtpService } from './otp.service';
+import { ProcessService } from './process.service';
 import { MongoModels } from '../shared/mongo-models.module';
+
 
 @Module({
   imports: [MongoModels],
-  providers: [OtpService],
+  providers: [ProcessService],
 })
-export class OtpModule { }
+export class ProcessModule { }

@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Schema as MongooseSchema } from 'mongoose'; // Rename mongoose Schema
-import { Process } from 'src/common/models/process.model';
 import { OTP_TTL } from 'src/config/env.config';
+import { Process } from 'src/modules/processes/models/process.model';
 
 export type OtpDocument = HydratedDocument<Otp>;
 
@@ -11,12 +11,12 @@ export class Otp {
     processId: Process;
 
     @Prop({ required: true })
-    otp: string;
+    code: string;
 
     @Prop({ required: true, default: Date.now, expires: `${OTP_TTL}m` })
     createdAt: Date;
 
-    @Prop({ default: false })
+    @Prop({ required: true, default: true })
     isValid: boolean;
 }
 

@@ -6,6 +6,7 @@ import { ExceptionsFilter } from '../common/filters/all-exceptions.filter';
 import { ResponseInterceptor } from '../common/interceptors/response.interceptor';
 import { AuthenticationModule } from './authentication/authentication.module';
 import { OtpModule } from './otp/otp.module';
+import { ProcessModule } from './processes/process.module';
 
 @Module({
     imports: [
@@ -13,6 +14,7 @@ import { OtpModule } from './otp/otp.module';
         UtilityModule,
         AuthenticationModule,
         OtpModule,
+        ProcessModule,
     ],
     providers: [
         {

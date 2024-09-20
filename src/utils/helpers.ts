@@ -3,6 +3,7 @@ import * as argon2 from "argon2";
 import { PromisePool } from '@supercharge/promise-pool/dist';
 import * as CryptoJS from 'crypto-js'
 import * as currencyConverter from 'currency-exchanger-js'
+import _ from 'lodash'
 
 import {
     PhoneNumberFormat as PNF,
@@ -26,17 +27,20 @@ export function extractPhoneNumberInfo(phoneNumber: string) {
         const phoneNumberUtil = PhoneNumberUtil.getInstance();
         const parsedNumber = phoneNumberUtil.parse(phoneNumber, 'ZZ'); // 'ZZ' means unknown region
 
-        const countryCode = phoneNumberUtil.getRegionCodeForNumber(parsedNumber);
-        const nationalNumber = phoneNumberUtil.format(parsedNumber, PNF.NATIONAL);
+        const countryCode: string = phoneNumberUtil.getRegionCodeForNumber(parsedNumber);
+        const nationalNumber: string = phoneNumberUtil.format(parsedNumber, PNF.NATIONAL);
+        const intlNumber: string = phoneNumberUtil.format(parsedNumber, PNF.E164);
 
         return {
             countryCode,
             nationalNumber,
+            intlNumber: intlNumber.substring(1, intlNumber.length)
         };
     }
     return {
         countryCode: '',
         nationalNumber: '',
+        intlNumber: ''
     };
 }
 

@@ -1,10 +1,9 @@
 import { Module } from "@nestjs/common";
 import { MongooseModule } from "@nestjs/mongoose";
-
 import { User, UserSchema } from "../user/models/user.model";
 import { Otp, OtpSchema } from "../otp/models/otp.model";
-import { Process, ProcessSchema } from "src/common/models/process.model";
 import { Profile, ProfileSchema } from "../user/models/profile.model";
+import { Process, ProcessSchema } from "../processes/models/process.model";
 
 const modules = [
     // shared
