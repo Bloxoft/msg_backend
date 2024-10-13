@@ -1,3 +1,4 @@
 export enum ProcessType {
-    Auth = "auth"
+    AuthLogin = "auth-login",
+    AuthRegistration = "auth-registration",
 }

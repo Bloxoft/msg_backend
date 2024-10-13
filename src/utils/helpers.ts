@@ -23,9 +23,13 @@ export function normalizePhoneNumber(phoneNumber: string, countryCode: string) {
 }
 
 export function extractPhoneNumberInfo(phoneNumber: string) {
+    let formattedPhoneNumber = phoneNumber;
     if (phoneNumber) {
+        if (phoneNumber.substring(0, 1) !== '+') {
+            formattedPhoneNumber = '+'.concat(phoneNumber)
+        }
         const phoneNumberUtil = PhoneNumberUtil.getInstance();
-        const parsedNumber = phoneNumberUtil.parse(phoneNumber, 'ZZ'); // 'ZZ' means unknown region
+        const parsedNumber = phoneNumberUtil.parse(formattedPhoneNumber, 'ZZ'); // 'ZZ' means unknown region
 
         const countryCode: string = phoneNumberUtil.getRegionCodeForNumber(parsedNumber);
         const nationalNumber: string = phoneNumberUtil.format(parsedNumber, PNF.NATIONAL);

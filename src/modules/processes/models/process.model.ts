@@ -13,7 +13,7 @@ export class Process {
     metadata: object;
 
     @Prop({ required: true })
-    type: ProcessType.Auth;
+    type: ProcessType.AuthRegistration;
 
     @Prop({ required: true, default: false })
     completed: boolean;
