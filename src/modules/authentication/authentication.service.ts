@@ -43,7 +43,7 @@ export class AuthenticationService {
 
     // send notification to required channel
     this.notifier.emit('singleChannelMessage', new NotifierSingleChannelMessageEvent(MessageChannel.EMAIL, {
-      emails: ['ulimhunyieagbama@gmail.com'],
+      emailAddresses: ['ulimhunyieagbama@gmail.com'],
       subject: 'Hello there'
     } as EmailMessage))
 
