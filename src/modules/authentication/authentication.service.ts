@@ -12,6 +12,8 @@ import { NotifierSingleChannelMessageEvent } from 'src/common/events/notifier_se
 import { MessageChannel } from 'src/common/enums/channels.enum';
 import { EmailMessage } from 'src/common/dtos/email-message.dto';
 import { Profile } from '../user/models/profile.model';
+import _ from "lodash";
+import { SmsMessage } from 'src/common/dtos/sms-message.dto';
 
 @Injectable()
 export class AuthenticationService {
@@ -44,9 +46,9 @@ export class AuthenticationService {
       processId: authProcessData._id.toString(),
     })
     let notifierEventData: NotifierSingleChannelMessageEvent = new NotifierSingleChannelMessageEvent(MessageChannel.SMS, {
-      message: '',
-      phoneNumber: ''
-    })
+      message: `Your MSG ${findExistingUser ? 'Login' : 'Registration'} verification code is: \n ${createdOTP.substring(0, 3)}-${createdOTP.substring(3, 6)}`,
+      phoneNumber: '+' + phoneId
+    } as SmsMessage)
 
 
     if (findExistingUser) {
@@ -55,15 +57,20 @@ export class AuthenticationService {
       switch (caseToRun) {
         case MessageChannel.EMAIL:
           notifierEventData = new NotifierSingleChannelMessageEvent(MessageChannel.EMAIL, {
-            EmailMessage()
-          })
+            emailAddresses: userProfile.email,
+            subject: `${findExistingUser ? 'Login' : 'Registration'} verification code has been sent to your email`,
+            template: 'verification_code',
+            context: {
+              code: createdOTP,
+              user: userProfile ? `${userProfile.firstName} ${userProfile.lastName}` : 'John Doe',
+              process: findExistingUser ? 'Login' : 'Registration'
+            }
+          } as EmailMessage)
           break;
 
         default:
           break;
       }
-    } else {
-
     }
 
     // send notification to required channel

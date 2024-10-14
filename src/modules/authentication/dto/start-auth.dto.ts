@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsPhoneNumber, IsString } from "class-validator";
+import { IsNotEmpty, IsObject, IsOptional, IsPhoneNumber, IsString } from "class-validator";
 import { MessageChannel } from "src/common/enums/channels.enum";
 
 export class StartAuthDto {
@@ -7,5 +7,10 @@ export class StartAuthDto {
     phoneNumberIntl: string;
 
     @IsString()
-    verificationChannel?: MessageChannel
+    @IsOptional()
+    verificationChannel: MessageChannel
+
+    @IsObject()
+    @IsOptional()
+    metadata: Object
 }

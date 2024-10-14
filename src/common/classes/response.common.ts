@@ -1,3 +1,4 @@
+import { APP_VERSION } from "src/config/env.config";
 
 export class ResponseService {
     default({ statusCode, message = 'Request Completed', data, success, url }: { statusCode: number, message?: string, data?: any, success?: boolean, url: string }) {
@@ -6,6 +7,7 @@ export class ResponseService {
             path: url,
             message: message,
             success: success || true,
+            version: APP_VERSION,
             timestamp: new Date().toISOString(),
             statusCode
         }
@@ -17,6 +19,7 @@ export class ResponseService {
             message: message,
             success: false,
             path: url,
+            version: APP_VERSION,
             timestamp: new Date().toISOString(),
             statusCode,
             error
@@ -29,6 +32,7 @@ export class ResponseService {
             data: data,
             message: message,
             path: url,
+            version: APP_VERSION,
             success: true,
             timestamp: new Date().toISOString(),
             statusCode
