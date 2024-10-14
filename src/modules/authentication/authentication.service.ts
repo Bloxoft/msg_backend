@@ -11,12 +11,14 @@ import { ProcessService } from '../processes/process.service';
 import { NotifierSingleChannelMessageEvent } from 'src/common/events/notifier_service.event';
 import { MessageChannel } from 'src/common/enums/channels.enum';
 import { EmailMessage } from 'src/common/dtos/email-message.dto';
+import { Profile } from '../user/models/profile.model';
 
 @Injectable()
 export class AuthenticationService {
   constructor(
     @Inject('NOTIFIER_SERVICE') private notifier: ClientProxy,
     @InjectModel(User.name) private user: Model<User>,
+    @InjectModel(Profile.name) private profile: Model<Profile>,
     private readonly otpService: OtpService,
     private readonly processService: ProcessService,
   ) { }
@@ -38,15 +40,34 @@ export class AuthenticationService {
     })
 
     const createdOTP = await this.otpService.create({
+      length: 6,
       processId: authProcessData._id.toString(),
     })
+    let notifierEventData: NotifierSingleChannelMessageEvent = new NotifierSingleChannelMessageEvent(MessageChannel.SMS, {
+      message: '',
+      phoneNumber: ''
+    })
+
+
+    if (findExistingUser) {
+      const userProfile = await this.profile.findOne({ userId: findExistingUser._id })
+      const caseToRun = data.verificationChannel !== null && data.verificationChannel.length > 0 ? data.verificationChannel : userProfile.defaultVerificationChannel;
+      switch (caseToRun) {
+        case MessageChannel.EMAIL:
+          notifierEventData = new NotifierSingleChannelMessageEvent(MessageChannel.EMAIL, {
+            EmailMessage()
+          })
+          break;
+
+        default:
+          break;
+      }
+    } else {
+
+    }
 
     // send notification to required channel
-    this.notifier.emit('singleChannelMessage', new NotifierSingleChannelMessageEvent(MessageChannel.EMAIL, {
-      emailAddresses: ['ulimhunyieagbama@gmail.com'],
-      subject: 'Hello there'
-    } as EmailMessage))
-
+    this.notifier.emit('singleChannelMessage', notifierEventData)
     console.log(createdOTP)
 
     // TODO: Implement sending verification code logic

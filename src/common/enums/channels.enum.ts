@@ -1,3 +1,5 @@
 export enum MessageChannel {
-    EMAIL = 'email'
+    EMAIL = 'email',
+    SMS = 'sms',
+    PUSH = 'push'
 }

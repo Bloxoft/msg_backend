@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
 import { User } from './user.model';
+import { MessageChannel } from 'src/common/enums/channels.enum';
 
 export type ProfileDocument = HydratedDocument<Profile>;
 
@@ -11,6 +12,15 @@ export class Profile {
 
     @Prop({ required: true, default: 'en' })
     locale: string;
+
+    @Prop({ required: true })
+    timezone: string;
+
+    @Prop({ required: true, default: MessageChannel.SMS })
+    defaultVerificationChannel: string;
+
+    @Prop({ required: true, default: [MessageChannel.SMS] })
+    availableVerificationChannel: Array<string>;
 
     @Prop({ required: true, trim: true })
     phoneNumberIntl: string;
