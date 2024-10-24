@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
 import { UserModule } from './user/user.module';
 import { UtilityModule } from './utility/utility.module';
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
@@ -7,6 +7,9 @@ import { ResponseInterceptor } from '../common/interceptors/response.interceptor
 import { AuthenticationModule } from './authentication/authentication.module';
 import { OtpModule } from './otp/otp.module';
 import { ProcessModule } from './processes/process.module';
+import { AuthMiddleware } from './user/middlewares/auth.middleware';
+import { UserService } from './user/user.service';
+import { MongoModels } from './shared/mongo-models.module';
 
 @Module({
     imports: [
@@ -15,6 +18,7 @@ import { ProcessModule } from './processes/process.module';
         AuthenticationModule,
         OtpModule,
         ProcessModule,
+        MongoModels
     ],
     providers: [
         {
@@ -24,7 +28,15 @@ import { ProcessModule } from './processes/process.module';
         {
             provide: APP_INTERCEPTOR,
             useClass: ResponseInterceptor
-        }
+        },
+        UserService
     ]
 })
-export class ApplicationModule { }
+export class ApplicationModule {
+    configure(consumer: MiddlewareConsumer) {
+        consumer.apply(AuthMiddleware).forRoutes({
+            path: '*',
+            method: RequestMethod.ALL
+        })
+    }
+}

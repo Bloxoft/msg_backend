@@ -10,11 +10,17 @@ export class Profile {
     @Prop({ required: true, type: MongooseSchema.Types.ObjectId, ref: 'User' })
     userId: User;
 
-    @Prop({ required: true, default: 'en' })
+    @Prop({ required: true, default: 'en_US' })
     locale: string;
 
-    @Prop({ required: true })
+    @Prop({ required: true, default: 'UTC' })
     timezone: string;
+
+    @Prop({ required: true, default: 'en_US' })
+    currentLocale: string;
+
+    @Prop({ required: true, default: 'UTC' })
+    currentTimezone: string;
 
     @Prop({ required: true, default: MessageChannel.SMS })
     defaultVerificationChannel: string;
@@ -43,7 +49,7 @@ export class Profile {
     @Prop({ required: false, trim: true, set: (v: string) => v.toLowerCase(), unique: true })
     email: string;
 
-    @Prop()
+    @Prop({ required: false })
     bio: string;
 
     @Prop({ required: true, })

@@ -19,4 +19,6 @@ import { ApplicationModule } from './modules/application.module';
     },
   ],
 })
-export class AppModule { }
+export class AppModule {
+
+}

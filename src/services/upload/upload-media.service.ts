@@ -94,7 +94,7 @@ export class UploadMediaService {
                     }
                 }
 
-                return filesResult;
+                return { data: filesResult };
             } catch (error) {
                 return {
                     success: false,

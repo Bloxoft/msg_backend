@@ -1,26 +1,60 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { CreateProfileDto } from './dto/create-profile.dto';
+import { InjectModel } from '@nestjs/mongoose';
+import { User } from './models/user.model';
+import { Model, Types } from 'mongoose';
+import { Profile } from './models/profile.model';
+import { formatUsername } from 'src/utils/helpers';
+import { sign } from 'jsonwebtoken';
+import { ENCRYPTION_KEY } from 'src/config/env.config';
 
 @Injectable()
 export class UserService {
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+  constructor(
+    @InjectModel(User.name) private user: Model<User>,
+    @InjectModel(Profile.name) private profile: Model<Profile>,
+  ) { }
+  async create(data: CreateUserDto) {
+    const findExistingUser = await this.user.findOne({ phoneId: data.phoneId })
+    if (findExistingUser) {
+      throw new HttpException('User already exists', HttpStatus.EXPECTATION_FAILED)
+    }
+    return await this.user.create(data);
   }
 
-  findAll() {
-    return `This action returns all user`;
+  async createProfile(data: CreateProfileDto) {
+    const findExistingProfile = await this.profile.findOne({ userId: data.userId })
+    if (findExistingProfile) {
+      throw new HttpException('Profile already exists', HttpStatus.EXPECTATION_FAILED)
+    }
+    return await this.profile.create({ ...data, username: formatUsername(data.username) });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async checkUsernameStatus(username: String) {
+    const findExistingUsername = await this.profile.findOne({ username: username })
+    if (findExistingUsername) {
+      return { message: 'Status Checked', statusCode: 200, data: { exists: true } }
+    } else {
+      return { message: 'Status Checked', statusCode: 200, data: { exists: false } }
+    }
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async findOneUser(query: Object) {
+    return await this.user.findOne(query)
+  }
+  async findOneProfile(query: Object) {
+    return await this.profile.findOne(query)
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async findUserById(id: String) {
+    return await this.user.findById(id)
+  }
+  async findProfileById(id: String) {
+    return await this.profile.findById(id)
+  }
+
+  generateJwt(userId: String): string {
+    return sign({ userId }, ENCRYPTION_KEY)
   }
 }

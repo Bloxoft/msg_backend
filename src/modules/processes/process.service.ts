@@ -19,4 +19,31 @@ export class ProcessService {
             return await this.process.create(data)
         }
     }
+
+    async complete(id: String) {
+        const existingProcess = await this.process.findByIdAndUpdate(id, {
+            completed: true
+        })
+
+        return existingProcess;
+    }
+
+    async findById(id: String) {
+        return await this.process.findById(id)
+
+    }
+
+    async remove(id: String) {
+        return await this.process.findByIdAndDelete(id)
+
+    }
+
+    async status(id: String) {
+        const existingProcess = await this.process.findById(id)
+        if (existingProcess) {
+            return existingProcess.completed;
+        } else {
+            return null;
+        }
+    }
 }

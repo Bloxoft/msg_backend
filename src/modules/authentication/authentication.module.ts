@@ -5,10 +5,11 @@ import { Microservices } from '../shared/microservice.module';
 import { MongoModels } from '../shared/mongo-models.module';
 import { ProcessService } from '../processes/process.service';
 import { OtpService } from '../otp/otp.service';
+import { UserService } from '../user/user.service';
 
 @Module({
   imports: [Microservices, MongoModels],
   controllers: [AuthenticationController],
-  providers: [AuthenticationService, ProcessService, OtpService],
+  providers: [AuthenticationService, ProcessService, OtpService, UserService],
 })
 export class AuthenticationModule { }

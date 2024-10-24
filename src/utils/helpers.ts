@@ -34,17 +34,20 @@ export function extractPhoneNumberInfo(phoneNumber: string) {
         const countryCode: string = phoneNumberUtil.getRegionCodeForNumber(parsedNumber);
         const nationalNumber: string = phoneNumberUtil.format(parsedNumber, PNF.NATIONAL);
         const intlNumber: string = phoneNumberUtil.format(parsedNumber, PNF.E164);
+        const phonePrefix: string = phoneNumberUtil.getCountryCodeForRegion(countryCode).toString()
 
         return {
             countryCode,
             nationalNumber,
+            prefix: phonePrefix,
             intlNumber: intlNumber.substring(1, intlNumber.length)
         };
     }
     return {
         countryCode: '',
         nationalNumber: '',
-        intlNumber: ''
+        intlNumber: '',
+        prefix: '',
     };
 }
 
@@ -131,4 +134,8 @@ export async function runConcurrently<T>(
     return await new PromisePool(data)
         .withConcurrency(concurrentCount)
         .process(process);
+}
+
+export function formatUsername(name: String) {
+    return name.replaceAll('@', '');
 }

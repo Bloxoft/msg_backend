@@ -1,19 +1,22 @@
 import { ProcessType } from './../processes/enums/type.lib';
-import { Inject, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable, NotAcceptableException, NotFoundException } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { StartAuthDto } from './dto/start-auth.dto';
 import { User } from '../user/models/user.model';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
-import { extractPhoneNumberInfo } from 'src/utils/helpers';
+import { extractPhoneNumberInfo, formatUsername } from 'src/utils/helpers';
 import { OtpService } from '../otp/otp.service';
 import { ProcessService } from '../processes/process.service';
 import { NotifierSingleChannelMessageEvent } from 'src/common/events/notifier_service.event';
 import { MessageChannel } from 'src/common/enums/channels.enum';
 import { EmailMessage } from 'src/common/dtos/email-message.dto';
 import { Profile } from '../user/models/profile.model';
-import _ from "lodash";
 import { SmsMessage } from 'src/common/dtos/sms-message.dto';
+import { VerifyAuthDto } from './dto/verify-auth.dto';
+import { VerifyOtpDto } from '../otp/dto/verify-otp.dto';
+import { FinishAuthDto } from './dto/finish-auth.dto';
+import { UserService } from '../user/user.service';
 
 @Injectable()
 export class AuthenticationService {
@@ -23,13 +26,13 @@ export class AuthenticationService {
     @InjectModel(Profile.name) private profile: Model<Profile>,
     private readonly otpService: OtpService,
     private readonly processService: ProcessService,
+    private readonly userService: UserService,
   ) { }
 
   // Initiates the registration process for a new user
   async startAuthenticationProcess(data: StartAuthDto) {
     // Extract and normalize the phone number
     const transformPhoneNumber = extractPhoneNumberInfo(data.phoneNumberIntl);
-    console.log(transformPhoneNumber.intlNumber)
 
     const phoneId = transformPhoneNumber.intlNumber
 
@@ -47,7 +50,7 @@ export class AuthenticationService {
     })
     let notifierEventData: NotifierSingleChannelMessageEvent = new NotifierSingleChannelMessageEvent(MessageChannel.SMS, {
       message: `Your MSG ${findExistingUser ? 'Login' : 'Registration'} verification code is: \n ${createdOTP.substring(0, 3)}-${createdOTP.substring(3, 6)}`,
-      phoneNumber: '+' + phoneId
+      phoneNumber: phoneId
     } as SmsMessage)
 
 
@@ -79,5 +82,69 @@ export class AuthenticationService {
 
     // TODO: Implement sending verification code logic
     return { message: 'Verification code sent successfully!' }
+  }
+
+  async verifyAuthenticationProcess(data: VerifyAuthDto) {
+    const findProcess = await this.processService.status(data.processId)
+    if (findProcess == null) {
+      throw new NotFoundException('No process found')
+    }
+
+    if (findProcess == true) {
+      return { message: 'Verified' }
+    } else {
+      const verifyOtp = await this.otpService.verifyOtp({
+        otp: data.code,
+        processId: data.processId
+      } as VerifyOtpDto)
+
+      if (verifyOtp === true) {
+        await this.processService.complete(data.processId)
+        return { message: 'Verified' }
+      } else if (verifyOtp === false) {
+        throw new NotAcceptableException('Incorrect OTP');
+      }
+    }
+  }
+
+  async finishAuthenticationProcess(data: FinishAuthDto) {
+    const findProcess = await this.processService.findById(data.processId)
+    if (findProcess == null) {
+      throw new NotFoundException('Invalid Authentication Process')
+    }
+
+    if (findProcess.completed == true) {
+      const transformPhoneNumber = extractPhoneNumberInfo(data.phoneNumberIntl);
+      switch (data.type) {
+        case 'REGISTRATION':
+          const createUser = await this.userService.create({ phoneId: transformPhoneNumber.intlNumber, phonePrefix: transformPhoneNumber.prefix })
+          const createProfile = await this.userService.createProfile({ userId: createUser._id, ...data });
+          await this.processService.remove(data.processId)
+          return {
+            message: 'Registered Successfully!', statusCode: HttpStatus.CREATED, data: {
+              profile: createProfile,
+              user: createUser,
+              sessionToken: this.userService.generateJwt(createUser.id)
+            }
+          }
+
+        case 'LOGIN':
+          const findUser = await this.userService.findOneUser({ phoneId: findProcess.phoneId })
+          if (!findUser) {
+            throw new NotFoundException('User not found!')
+          }
+          const findProfile = await this.userService.findOneProfile({ userId: findUser._id })
+          await this.processService.remove(data.processId)
+          return {
+            message: 'Login Successfully!', statusCode: HttpStatus.ACCEPTED, data: {
+              profile: findUser,
+              user: findProfile,
+              sessionToken: this.userService.generateJwt(findUser.id)
+            }
+          }
+      }
+    } else {
+      throw new HttpException('Authentication process not completed', HttpStatus.PRECONDITION_REQUIRED)
+    }
   }
 }
