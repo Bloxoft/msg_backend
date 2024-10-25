@@ -53,8 +53,4 @@ export class UserService {
   async findProfileById(id: String) {
     return await this.profile.findById(id)
   }
-
-  generateJwt(userId: String): string {
-    return sign({ userId }, ENCRYPTION_KEY)
-  }
 }

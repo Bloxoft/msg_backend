@@ -10,6 +10,7 @@ import { ProcessModule } from './processes/process.module';
 import { AuthMiddleware } from './user/middlewares/auth.middleware';
 import { UserService } from './user/user.service';
 import { MongoModels } from './shared/mongo-models.module';
+import { JwtService } from '@nestjs/jwt';
 
 @Module({
     imports: [
@@ -18,7 +19,7 @@ import { MongoModels } from './shared/mongo-models.module';
         AuthenticationModule,
         OtpModule,
         ProcessModule,
-        MongoModels
+        MongoModels,
     ],
     providers: [
         {
@@ -29,7 +30,8 @@ import { MongoModels } from './shared/mongo-models.module';
             provide: APP_INTERCEPTOR,
             useClass: ResponseInterceptor
         },
-        UserService
+        UserService,
+        JwtService
     ]
 })
 export class ApplicationModule {

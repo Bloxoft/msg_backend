@@ -15,6 +15,7 @@ type EnvConfig = {
     NOTIFIER_MS_PORT: number;
 
     ENCRYPTION_KEY: string;
+    JWT_ENCRYPTION_KEY: string;
 }
 
 const env: EnvConfig = process.env as unknown as EnvConfig;
@@ -27,6 +28,7 @@ export const DB_STRING = env.MONGO_DB_STRING;
 export const OTP_TTL = env.OTP_TTL || 5;
 
 export const ENCRYPTION_KEY = env.ENCRYPTION_KEY;
+export const JWT_ENCRYPTION_KEY = env.JWT_ENCRYPTION_KEY;
 
 export const CLOUDINARY_CONFIG = {
     cloud_name: env.CLOUDINARY_API_NAME,

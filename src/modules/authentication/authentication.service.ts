@@ -5,7 +5,7 @@ import { StartAuthDto } from './dto/start-auth.dto';
 import { User } from '../user/models/user.model';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
-import { extractPhoneNumberInfo, formatUsername } from 'src/utils/helpers';
+import { extractPhoneNumberInfo } from 'src/utils/helpers';
 import { OtpService } from '../otp/otp.service';
 import { ProcessService } from '../processes/process.service';
 import { NotifierSingleChannelMessageEvent } from 'src/common/events/notifier_service.event';
@@ -17,6 +17,8 @@ import { VerifyAuthDto } from './dto/verify-auth.dto';
 import { VerifyOtpDto } from '../otp/dto/verify-otp.dto';
 import { FinishAuthDto } from './dto/finish-auth.dto';
 import { UserService } from '../user/user.service';
+import { JwtService } from '@nestjs/jwt';
+import { JWT_ENCRYPTION_KEY } from 'src/config/env.config';
 
 @Injectable()
 export class AuthenticationService {
@@ -27,6 +29,7 @@ export class AuthenticationService {
     private readonly otpService: OtpService,
     private readonly processService: ProcessService,
     private readonly userService: UserService,
+    private readonly jwtService: JwtService
   ) { }
 
   // Initiates the registration process for a new user
@@ -124,7 +127,7 @@ export class AuthenticationService {
             message: 'Registered Successfully!', statusCode: HttpStatus.CREATED, data: {
               profile: createProfile,
               user: createUser,
-              sessionToken: this.userService.generateJwt(createUser.id)
+              sessionToken: this.generateJwt(createUser.id)
             }
           }
 
@@ -139,12 +142,22 @@ export class AuthenticationService {
             message: 'Login Successfully!', statusCode: HttpStatus.ACCEPTED, data: {
               profile: findUser,
               user: findProfile,
-              sessionToken: this.userService.generateJwt(findUser.id)
+              sessionToken: this.generateJwt(findUser.id)
             }
           }
       }
     } else {
       throw new HttpException('Authentication process not completed', HttpStatus.PRECONDITION_REQUIRED)
     }
+  }
+
+  generateJwt(userId: String): string {
+    return this.jwtService.sign({ userId }, { secret: JWT_ENCRYPTION_KEY })
+  }
+
+  validateToken(token: String) {
+    return this.jwtService.verify(token.toString(), {
+      secret: process.env.JWT_SECRET_KEY
+    }) as { userId: string };
   }
 }
