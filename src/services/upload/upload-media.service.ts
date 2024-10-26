@@ -89,8 +89,8 @@ export class UploadMediaService {
 
 
                     } catch (error) {
-                        console.log('error here')
                         console.log(error)
+                        console.log('media upload error')
                     }
                 }
 

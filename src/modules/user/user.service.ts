@@ -26,7 +26,7 @@ export class UserService {
     if (findExistingProfile) {
       throw new HttpException('Profile already exists', HttpStatus.EXPECTATION_FAILED)
     }
-    return await this.profile.create({ ...data, username: formatUsername(data.username), currentLocale: data.locale, currentTimezone: data.locale });
+    return await this.profile.create({ ...data, username: formatUsername(data.username), currentLocale: data.locale, currentTimezone: data.timezone });
   }
 
   async checkUsernameStatus(username: String) {

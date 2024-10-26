@@ -56,12 +56,12 @@ export class AuthenticationService {
       phoneNumber: phoneId
     } as SmsMessage)
 
-    let userSupportsEmailChannel = false;
+    let userSupportsEmailChannel: string = null;
 
     if (findExistingUser) {
       const userProfile = await this.profile.findOne({ userId: findExistingUser._id })
-      if (userProfile && userProfile.availableVerificationChannel.includes(MessageChannel.EMAIL)) {
-        userSupportsEmailChannel = true;
+      if (userProfile && userProfile.availableVerificationChannel.includes(MessageChannel.EMAIL) && userProfile.email != null) {
+        userSupportsEmailChannel = userProfile.email;
       }
       const caseToRun = data.verificationChannel && data.verificationChannel.length > 0 ? data.verificationChannel : userProfile.defaultVerificationChannel;
       switch (caseToRun) {
@@ -92,22 +92,22 @@ export class AuthenticationService {
     return {
       message: 'Verification code sent successfully!', data: {
         processId: authProcessData._id,
-        supportsEmail: userSupportsEmailChannel
+        supportsEmail: userSupportsEmailChannel ? true : false,
+        userEmail: userSupportsEmailChannel,
+        channelUsed: notifierEventData.channel
       }
     }
   }
 
   async verifyAuthenticationProcess(data: VerifyAuthDto) {
-    const findProcess = await this.processService.status(data.processId)
+    const findProcess = await this.processService.findById(data.processId)
     if (findProcess == null) {
       throw new NotFoundException('No process found')
     }
+    const getUserFromProcess = await this.userService.findOneUser({ phoneId: findProcess.phoneId })
 
-    console.log(findProcess)
-
-    if (findProcess == true) {
-      console.log('success1')
-      return { message: 'Verified' }
+    if (findProcess.completed == true) {
+      return { message: 'Verified', data: { userExists: getUserFromProcess ? true : false } }
     } else {
       const verifyOtp = await this.otpService.verifyOtp({
         otp: data.code,
@@ -116,8 +116,7 @@ export class AuthenticationService {
 
       if (verifyOtp === true) {
         await this.processService.complete(data.processId)
-        console.log('success')
-        return { message: 'Verified' }
+        return { message: 'Verified', data: { userExists: getUserFromProcess ? true : false } }
       } else if (verifyOtp === false) {
         throw new NotAcceptableException('Incorrect OTP');
       }
