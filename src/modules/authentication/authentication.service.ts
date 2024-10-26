@@ -56,10 +56,14 @@ export class AuthenticationService {
       phoneNumber: phoneId
     } as SmsMessage)
 
+    let userSupportsEmailChannel = false;
 
     if (findExistingUser) {
       const userProfile = await this.profile.findOne({ userId: findExistingUser._id })
-      const caseToRun = data.verificationChannel !== null && data.verificationChannel.length > 0 ? data.verificationChannel : userProfile.defaultVerificationChannel;
+      if (userProfile && userProfile.availableVerificationChannel.includes(MessageChannel.EMAIL)) {
+        userSupportsEmailChannel = true;
+      }
+      const caseToRun = data.verificationChannel && data.verificationChannel.length > 0 ? data.verificationChannel : userProfile.defaultVerificationChannel;
       switch (caseToRun) {
         case MessageChannel.EMAIL:
           notifierEventData = new NotifierSingleChannelMessageEvent(MessageChannel.EMAIL, {
@@ -83,8 +87,14 @@ export class AuthenticationService {
     this.notifier.emit('singleChannelMessage', notifierEventData)
     console.log(createdOTP)
 
+
     // TODO: Implement sending verification code logic
-    return { message: 'Verification code sent successfully!' }
+    return {
+      message: 'Verification code sent successfully!', data: {
+        processId: authProcessData._id,
+        supportsEmail: userSupportsEmailChannel
+      }
+    }
   }
 
   async verifyAuthenticationProcess(data: VerifyAuthDto) {
@@ -93,7 +103,10 @@ export class AuthenticationService {
       throw new NotFoundException('No process found')
     }
 
+    console.log(findProcess)
+
     if (findProcess == true) {
+      console.log('success1')
       return { message: 'Verified' }
     } else {
       const verifyOtp = await this.otpService.verifyOtp({
@@ -103,6 +116,7 @@ export class AuthenticationService {
 
       if (verifyOtp === true) {
         await this.processService.complete(data.processId)
+        console.log('success')
         return { message: 'Verified' }
       } else if (verifyOtp === false) {
         throw new NotAcceptableException('Incorrect OTP');

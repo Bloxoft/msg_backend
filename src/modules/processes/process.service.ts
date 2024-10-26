@@ -13,7 +13,7 @@ export class ProcessService {
     async create(data: CreateProcessDto) {
         const previousProcess = await this.process.findOne(data)
 
-        if (previousProcess) {
+        if (previousProcess && !previousProcess.completed) {
             return previousProcess
         } else {
             return await this.process.create(data)

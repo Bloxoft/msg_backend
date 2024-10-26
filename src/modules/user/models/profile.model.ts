@@ -46,7 +46,7 @@ export class Profile {
     @Prop({ trim: true })
     lastName: string;
 
-    @Prop({ required: false, trim: true, set: (v: string) => v.toLowerCase(), unique: true })
+    @Prop({ required: false, trim: true, set: (v: string) => v.toLowerCase() })
     email: string;
 
     @Prop({ required: false })
