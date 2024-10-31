@@ -52,7 +52,7 @@ export class AuthenticationService {
       processId: authProcessData._id.toString(),
     })
     let notifierEventData: NotifierSingleChannelMessageEvent = new NotifierSingleChannelMessageEvent(MessageChannel.SMS, {
-      message: `Your MSG ${findExistingUser ? 'Login' : 'Registration'} verification code is: \n ${createdOTP.substring(0, 3)}-${createdOTP.substring(3, 6)}`,
+      message: `Your MSG ${findExistingUser ? 'Login' : 'Registration'} verification code is: \n ${createdOTP.substring(0, 3)}-${createdOTP.substring(3, 6)} \n \n ${data.metadata?.appSignature}`,
       phoneNumber: phoneId
     } as SmsMessage)
 
@@ -69,10 +69,10 @@ export class AuthenticationService {
           notifierEventData = new NotifierSingleChannelMessageEvent(MessageChannel.EMAIL, {
             emailAddresses: userProfile.email,
             subject: `${findExistingUser ? 'Login' : 'Registration'} verification code has been sent to your email`,
-            template: 'verification_code',
+            template: 'auth/verification_code',
             context: {
               code: createdOTP,
-              user: userProfile ? `${userProfile.firstName} ${userProfile.lastName}` : 'John Doe',
+              user: userProfile?.firstName ? `${userProfile.firstName} ${userProfile.lastName}` : 'John Doe',
               process: findExistingUser ? 'Login' : 'Registration'
             }
           } as EmailMessage)
@@ -85,7 +85,6 @@ export class AuthenticationService {
 
     // send notification to required channel
     this.notifier.emit('singleChannelMessage', notifierEventData)
-    console.log(createdOTP)
 
 
     // TODO: Implement sending verification code logic
@@ -153,8 +152,8 @@ export class AuthenticationService {
           await this.processService.remove(data.processId)
           return {
             message: 'Login Successfully!', statusCode: HttpStatus.ACCEPTED, data: {
-              profile: findUser,
-              user: findProfile,
+              profile: findProfile,
+              user: findUser,
               sessionToken: this.generateJwt(findUser.id)
             }
           }
