@@ -5,7 +5,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { User } from './models/user.model';
 import { Model, Types } from 'mongoose';
 import { Profile } from './models/profile.model';
-import { formatUsername, getNameFromProfile } from 'src/utils/helpers';
+import { extractPhoneNumberInfo, formatUsername, getNameFromProfile, normalizePhoneNumber } from 'src/utils/helpers';
 import { Contact } from './classes/contact';
 
 @Injectable()
@@ -44,8 +44,16 @@ export class UserService {
     const userProfile = await this.profile.findOne({ userId })
     if (data.length > 0) {
       for (const contact of data) {
-        const findProfile = await this.profile.findOne({ phoneNumberIntl: contact.phoneId })
-        if (findProfile && userProfile?.userId.phoneId != findProfile.userId.phoneId) {
+        let findProfile = await this.profile.findOne({ phoneNumberIntl: contact.phoneId })
+        if (!findProfile) {
+          try {
+            findProfile = await this.profile.findOne({ phoneNumberIntl: normalizePhoneNumber(contact.phoneId, userProfile.countryCode).substring(1) })
+          } catch (error) {
+            continue;
+          }
+        }
+
+        if (findProfile && userProfile?.username != findProfile.username) {
           profilesFound.push(new Contact(findProfile.phoneNumberIntl, findProfile.email, findProfile.avatarUrl, findProfile.username, getNameFromProfile(findProfile), findProfile.countryCode));
         }
       }
