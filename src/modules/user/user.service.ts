@@ -5,7 +5,8 @@ import { InjectModel } from '@nestjs/mongoose';
 import { User } from './models/user.model';
 import { Model, Types } from 'mongoose';
 import { Profile } from './models/profile.model';
-import { formatUsername } from 'src/utils/helpers';
+import { formatUsername, getNameFromProfile } from 'src/utils/helpers';
+import { Contact } from './classes/contact';
 
 @Injectable()
 export class UserService {
@@ -36,6 +37,21 @@ export class UserService {
     } else {
       return { message: 'Status Checked', statusCode: 200, data: { exists: false } }
     }
+  }
+
+  async checkUsersFromContactsList(data: Contact[], userId: string) {
+    const profilesFound: Contact[] = [];
+    const userProfile = await this.profile.findOne({ userId })
+    if (data.length > 0) {
+      for (const contact of data) {
+        const findProfile = await this.profile.findOne({ phoneNumberIntl: contact.phoneId })
+        if (findProfile && userProfile?.userId.phoneId != findProfile.userId.phoneId) {
+          profilesFound.push(new Contact(findProfile.phoneNumberIntl, findProfile.email, findProfile.avatarUrl, findProfile.username, getNameFromProfile(findProfile), findProfile.countryCode));
+        }
+      }
+    }
+
+    return { message: 'Contacts Checked', statusCode: 200, data: profilesFound }
   }
 
   async findOneUser(query: Object) {

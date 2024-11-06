@@ -10,6 +10,7 @@ import {
     PhoneNumberUtil,
 } from 'google-libphonenumber';
 import { ENCRYPTION_KEY } from 'src/config/env.config';
+import { Profile } from 'src/modules/user/models/profile.model';
 
 
 const phoneUtil = PhoneNumberUtil.getInstance();
@@ -138,4 +139,17 @@ export async function runConcurrently<T>(
 
 export function formatUsername(name: String) {
     return name.replaceAll('@', '');
+}
+
+export function getNameFromProfile(profile: Profile): string | null {
+    let name = '';
+    if (profile.firstName) {
+        name += `${profile.firstName}`
+    }
+    if (profile.lastName) {
+        name += ` ${profile.lastName}`
+    }
+    if (name.length > 0) {
+        return name;
+    } else null;
 }

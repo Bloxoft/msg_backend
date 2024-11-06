@@ -2,7 +2,7 @@ import {
     CanActivate, ExecutionContext, Injectable, UnauthorizedException,
     ForbiddenException,
 } from '@nestjs/common'; import { JwtService } from '@nestjs/jwt';
-import { ENCRYPTION_KEY } from 'src/config/env.config';
+import { JWT_ENCRYPTION_KEY } from 'src/config/env.config';
 
 
 @Injectable()
@@ -18,12 +18,14 @@ export class AuthGuard implements CanActivate {
             }
             const authToken = authorization.replace(/bearer/gim, '').trim();
             const resp = this.jwtService.verify(authToken, {
-                secret: ENCRYPTION_KEY
-            }) as { userId: String }
+                secret: JWT_ENCRYPTION_KEY
+            })
             request.decodedData = resp;
+            if (resp?.userId) {
+                request.user = resp.userId;
+            }
             return true;
         } catch (error) {
-            console.log('auth error - ', error.message);
             throw new ForbiddenException(error.message || 'Session expired! Please login');
         }
     }

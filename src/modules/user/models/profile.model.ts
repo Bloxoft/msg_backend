@@ -2,6 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
 import { User } from './user.model';
 import { MessageChannel } from 'src/common/enums/channels.enum';
+import { assets } from 'src/constant/assets.static';
 
 export type ProfileDocument = HydratedDocument<Profile>;
 
@@ -52,7 +53,7 @@ export class Profile {
     @Prop({ required: false })
     bio: string;
 
-    @Prop({ required: true, })
+    @Prop({ required: true, default: assets.avatars[0] })
     avatarUrl: string;
 }
 
