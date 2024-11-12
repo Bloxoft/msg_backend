@@ -1,5 +1,6 @@
 import { Module } from "@nestjs/common";
 import { ClientsModule, Transport } from '@nestjs/microservices';
+import { MicroservicesName } from "src/common/enums/microservices.enum";
 import { MICROSERVICE_PORTS } from "src/config/env.config";
 
 const modules = [

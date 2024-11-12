@@ -4,6 +4,7 @@ dotenv.config();
 type EnvConfig = {
     NODE_ENV: string;
     PORT: number;
+    CONNECTOR_PORT: number;
     CLOUDINARY_API_NAME: string;
     CLOUDINARY_API_KEY: string;
     CLOUDINARY_API_SECRET: string;
@@ -23,6 +24,7 @@ type EnvironmentType = 'development' | 'staging' | 'production' | 'test';
 
 export const appEnv: EnvironmentType = (env.NODE_ENV as EnvironmentType) || 'development';
 export const PORT: number = env.PORT || 3000;
+export const CONNECTOR_PORT: number = env.CONNECTOR_PORT || 3100;
 export const APP_VERSION = env.APP_VERSION || 'v1';
 export const DB_STRING = env.MONGO_DB_STRING;
 export const OTP_TTL = env.OTP_TTL || 5;

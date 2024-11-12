@@ -19,6 +19,7 @@ import { FinishAuthDto } from './dto/finish-auth.dto';
 import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { JWT_ENCRYPTION_KEY } from 'src/config/env.config';
+import { MicroservicesName } from 'src/common/enums/microservices.enum';
 
 @Injectable()
 export class AuthenticationService {

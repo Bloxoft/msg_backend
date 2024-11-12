@@ -1,7 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
-import { APP_VERSION, PORT } from './config/env.config';
+import { APP_VERSION, CONNECTOR_PORT, PORT } from './config/env.config';
 import helmet from 'helmet';
 import * as compression from 'compression';
 import { ExceptionsFilter } from './common/filters/all-exceptions.filter';
@@ -16,9 +16,10 @@ async function bootstrap() {
   app.connectMicroservice({
     transport: Transport.TCP,
     options: {
-      port: PORT,
+      port: CONNECTOR_PORT,
     },
   })
+
 
   app.enableCors({ origin: '*' })
   app.setGlobalPrefix(`api/${APP_VERSION}`);
