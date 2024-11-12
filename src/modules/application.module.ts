@@ -12,6 +12,7 @@ import { UserService } from './user/user.service';
 import { MongoModels } from './shared/mongo-models.module';
 import { JwtService } from '@nestjs/jwt';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { ServicesModule } from './microservice/services.module';
 
 @Module({
     imports: [
@@ -21,6 +22,9 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
         OtpModule,
         ProcessModule,
         MongoModels,
+        ServicesModule,
+
+
         ThrottlerModule.forRoot([{
             ttl: 10000,
             limit: 50,

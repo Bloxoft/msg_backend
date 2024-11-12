@@ -5,14 +5,14 @@ import { MICROSERVICE_PORTS } from "src/config/env.config";
 const modules = [
     ClientsModule.register([
         {
-            name: 'LANG_CHAIN_SERVICE',
+            name: MicroservicesName.LANG_CHAIN,
             transport: Transport.TCP,
             options: {
                 port: MICROSERVICE_PORTS.AI,
             },
         },
         {
-            name: 'NOTIFIER_SERVICE',
+            name: MicroservicesName.NOTIFIER,
             transport: Transport.TCP,
             options: {
                 port: MICROSERVICE_PORTS.NOTIFIER,

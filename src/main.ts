@@ -5,11 +5,19 @@ import { APP_VERSION, PORT } from './config/env.config';
 import helmet from 'helmet';
 import * as compression from 'compression';
 import { ExceptionsFilter } from './common/filters/all-exceptions.filter';
+import { Transport } from '@nestjs/microservices';
 
 async function bootstrap() {
   const logger = new Logger('NestApplication');
 
   const app = await NestFactory.create(AppModule);
+
+  app.connectMicroservice({
+    transport: Transport.TCP,
+    options: {
+      port: PORT,
+    },
+  })
 
   app.enableCors({ origin: '*' })
   app.setGlobalPrefix(`api/${APP_VERSION}`);
@@ -19,6 +27,7 @@ async function bootstrap() {
   app.use(helmet());
   app.use(compression())
 
+  app.startAllMicroservices()
   app
     .listen(PORT)
     .then(() => {

@@ -23,7 +23,7 @@ import { JWT_ENCRYPTION_KEY } from 'src/config/env.config';
 @Injectable()
 export class AuthenticationService {
   constructor(
-    @Inject('NOTIFIER_SERVICE') private notifier: ClientProxy,
+    @Inject(MicroservicesName.NOTIFIER) private notifier: ClientProxy,
     @InjectModel(User.name) private user: Model<User>,
     @InjectModel(Profile.name) private profile: Model<Profile>,
     private readonly otpService: OtpService,
