@@ -1,7 +1,7 @@
 import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
 import { UserModule } from './user/user.module';
 import { UtilityModule } from './utility/utility.module';
-import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { ExceptionsFilter } from '../common/filters/all-exceptions.filter';
 import { ResponseInterceptor } from '../common/interceptors/response.interceptor';
 import { AuthenticationModule } from './authentication/authentication.module';
@@ -11,6 +11,7 @@ import { AuthMiddleware } from './user/middlewares/auth.middleware';
 import { UserService } from './user/user.service';
 import { MongoModels } from './shared/mongo-models.module';
 import { JwtService } from '@nestjs/jwt';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 
 @Module({
     imports: [
@@ -20,6 +21,10 @@ import { JwtService } from '@nestjs/jwt';
         OtpModule,
         ProcessModule,
         MongoModels,
+        ThrottlerModule.forRoot([{
+            ttl: 10000,
+            limit: 50,
+        }]),
     ],
     providers: [
         {
@@ -30,6 +35,11 @@ import { JwtService } from '@nestjs/jwt';
             provide: APP_INTERCEPTOR,
             useClass: ResponseInterceptor
         },
+        {
+            provide: APP_GUARD,
+            useClass: ThrottlerGuard
+        },
+
         UserService,
         JwtService
     ]
