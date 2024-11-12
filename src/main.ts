@@ -1,16 +1,17 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { Logger, ValidationPipe } from '@nestjs/common';
+import { ValidationPipe } from '@nestjs/common';
 import { APP_VERSION, PORT } from './config/env.config';
 import helmet from 'helmet';
 import * as compression from 'compression';
 import { ExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { Transport } from '@nestjs/microservices';
+import { logger } from './common/helpers/logger.lib';
 
 async function bootstrap() {
-  const logger = new Logger('NestApplication');
-
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    bufferLogs: true
+  });
 
   app.connectMicroservice({
     transport: Transport.TCP,
@@ -28,6 +29,7 @@ async function bootstrap() {
   app.use(compression())
 
   app.startAllMicroservices()
+
   app
     .listen(PORT)
     .then(() => {
@@ -39,4 +41,5 @@ async function bootstrap() {
 
   app.useGlobalFilters(new ExceptionsFilter)
 }
+
 bootstrap();

@@ -2,8 +2,8 @@
 
 import { EventPattern, Payload } from "@nestjs/microservices";
 import { MicroserviceService } from "./services.service";
-import { logger } from "src/utils/logger.lib";
 import { Controller } from "@nestjs/common";
+import { logger } from "src/common/helpers/logger.lib";
 
 // Define a class or function to be part of the module
 @Controller()
