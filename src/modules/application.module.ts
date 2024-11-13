@@ -23,8 +23,6 @@ import { ServicesModule } from './microservice/services.module';
         ProcessModule,
         MongoModels,
         ServicesModule,
-
-
         ThrottlerModule.forRoot([{
             ttl: 10000,
             limit: 50,

@@ -41,3 +41,8 @@ export const MICROSERVICE_PORTS = {
     AI: env.AI_MS_PORT || 2001,
     NOTIFIER: env.NOTIFIER_MS_PORT || 2002
 }
+
+export const REDIS_MICROSERVICE_CONFIG = {
+    host: 'localhost',
+    port: 6379,
+}

@@ -1,7 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
-import { APP_VERSION, CONNECTOR_PORT, PORT } from './config/env.config';
+import { APP_VERSION, CONNECTOR_PORT, PORT, REDIS_MICROSERVICE_CONFIG } from './config/env.config';
 import helmet from 'helmet';
 import * as compression from 'compression';
 import { ExceptionsFilter } from './common/filters/all-exceptions.filter';
@@ -14,11 +14,11 @@ async function bootstrap() {
   });
 
   app.connectMicroservice({
-    transport: Transport.TCP,
-    options: {
-      port: CONNECTOR_PORT,
-    },
+    transport: Transport.REDIS,
+    options: REDIS_MICROSERVICE_CONFIG
   })
+
+  await app.startAllMicroservices()
 
 
   app.enableCors({ origin: '*' })
@@ -29,12 +29,12 @@ async function bootstrap() {
   app.use(helmet());
   app.use(compression())
 
-  app.startAllMicroservices()
 
-  app
+  await app
     .listen(PORT)
     .then(() => {
       logger.log(`Listening on port ${PORT}`);
+
     })
     .catch((error) => {
       logger.error(`Error listening on ${PORT} %o`, error);

@@ -1,6 +1,6 @@
 // Import necessary modules or dependencies
 
-import { EventPattern, Payload } from "@nestjs/microservices";
+import { EventPattern, MessagePattern, Payload } from "@nestjs/microservices";
 import { MicroserviceService } from "./services.service";
 import { Controller } from "@nestjs/common";
 import { logger } from "src/common/helpers/logger.lib";
@@ -11,8 +11,9 @@ export class ServicesController {
     constructor(private readonly mainService: MicroserviceService) { }
 
 
-    @EventPattern('test-service')
-    handleTestServiceEvent(@Payload() data: any) {
+    @MessagePattern({ cmd: 'testServer' })
+    handleTestServiceEvent(@Payload() data: any): string {
         logger.log(data)
+        return 'hello there'
     }
 }

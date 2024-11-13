@@ -44,6 +44,7 @@
     "date-fns": "^4.1.0",
     "google-libphonenumber": "^3.2.38",
     "helmet": "^7.1.0",
+    "ioredis": "^5.4.1",
     "lodash": "^4.17.21",
     "mongoose": "^8.6.3",
     "ramda": "^0.30.1",
