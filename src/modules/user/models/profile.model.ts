@@ -14,13 +14,13 @@ export class Profile {
     @Prop({ required: true, default: 'en_US' })
     locale: string;
 
-    @Prop({ required: true, default: 'UTC' })
+    @Prop({ required: true, default: 'Europe/London' })
     timezone: string;
 
     @Prop({ required: true, default: 'en_US' })
     currentLocale: string;
 
-    @Prop({ required: true, default: 'UTC' })
+    @Prop({ required: true, default: 'Europe/London' })
     currentTimezone: string;
 
     @Prop({ required: true, default: MessageChannel.SMS })

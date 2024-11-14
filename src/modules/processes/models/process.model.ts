@@ -12,8 +12,8 @@ export class Process {
     @Prop({ required: false, type: MongooseSchema.Types.Map })
     metadata: object;
 
-    @Prop({ required: true })
-    type: ProcessType.AuthRegistration;
+    @Prop({ required: true, default: ProcessType.AuthRegistration })
+    type: ProcessType;
 
     @Prop({ required: true, default: false })
     completed: boolean;

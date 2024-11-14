@@ -13,6 +13,7 @@ import { MongoModels } from './shared/mongo-models.module';
 import { JwtService } from '@nestjs/jwt';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { ServicesModule } from './microservice/services.module';
+import { MessagingModule } from './messaging/messaging.module';
 
 @Module({
     imports: [
@@ -27,6 +28,7 @@ import { ServicesModule } from './microservice/services.module';
             ttl: 10000,
             limit: 50,
         }]),
+        MessagingModule,
     ],
     providers: [
         {
