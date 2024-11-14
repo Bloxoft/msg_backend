@@ -8,16 +8,16 @@ export type ChatRoomDocument = HydratedDocument<ChatRoom>;
 
 @Schema({ timestamps: true })
 export class ChatRoom {
-    @Prop({ required: true, type: Array<MongooseSchema.Types.ObjectId>, ref: 'User' })
+    @Prop({ required: true, type: Array<MongooseSchema.Types.ObjectId>, ref: 'User', minlength: 1 })
     members: Array<User>;
 
-    @Prop({ required: true, type: Array<MongooseSchema.Types.ObjectId>, ref: 'User' })
+    @Prop({ required: true, type: Array<MongooseSchema.Types.ObjectId>, ref: 'User', default: [] })
     pinnedChats: Array<User>;
 
     @Prop({ required: true, default: RoomType.P2P })
     type: RoomType;
 
-    @Prop({ required: true, default: ChatRoomSettings })
+    @Prop({ required: true, default: new ChatRoomSettings() })
     settings: ChatRoomSettings;
 
     @Prop({ required: true })
@@ -30,7 +30,7 @@ export class ChatRoom {
     roomDescription: string;
 
     @Prop({ required: false, type: MongooseSchema.Types.ObjectId, ref: 'User' })
-    creatorUserId: string;
+    creatorUserId: User;
 
     @Prop({ required: true, default: Date.now, })
     createdAt: Date;

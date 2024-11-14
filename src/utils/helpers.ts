@@ -72,6 +72,11 @@ export class Encryptor {
         const ciphertext = CryptoJS.AES.encrypt(text, key);
         return ciphertext;
     }
+
+    createEncryptionKey(): string {
+        const concatenatedKey = new Encryptor().encryptor('rooms-encryptor', '').toString();
+        return concatenatedKey;
+    }
 }
 
 export class CurrencyManager {
