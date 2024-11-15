@@ -2,9 +2,21 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
 import { RoomType } from '../enums/type.lib';
 import { User } from 'src/modules/user/models/user.model';
-import { ChatRoomSettings } from './chatroom_settings.model';
 
 export type ChatRoomDocument = HydratedDocument<ChatRoom>;
+
+@Schema()
+export class PermissionsSchema {
+    @Prop({ required: true, type: MongooseSchema.Types.Boolean, default: true })
+    canAddMemebers: Boolean;
+}
+
+@Schema({ timestamps: true })
+export class ChatRoomSettings {
+    @Prop({ required: false, type: PermissionsSchema })
+    permissions: PermissionsSchema;
+}
+
 
 @Schema({ timestamps: true })
 export class ChatRoom {
@@ -22,6 +34,9 @@ export class ChatRoom {
 
     @Prop({ required: true })
     encryptionSecretKey: string;
+
+    @Prop({ required: false })
+    roomLogo: string;
 
     @Prop({ required: false })
     roomName: string;

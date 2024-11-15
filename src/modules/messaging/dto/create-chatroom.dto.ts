@@ -1,5 +1,6 @@
-import { IsArray, IsNotEmpty, IsOptional, IsString } from "class-validator";
+import { IsArray, IsNotEmpty, IsObject, IsOptional, IsString, IsUrl } from "class-validator";
 import { RoomType } from "../enums/type.lib";
+import { ChatRoomSettings } from "../models/chatroom.model";
 
 export class CreateChatroomDto {
     @IsArray()
@@ -17,5 +18,13 @@ export class CreateChatroomDto {
     @IsString()
     @IsOptional()
     roomDescription: string;
+
+    @IsUrl()
+    @IsOptional()
+    roomLogo: string;
+
+    @IsObject()
+    @IsOptional()
+    settings: ChatRoomSettings;
 
 }
