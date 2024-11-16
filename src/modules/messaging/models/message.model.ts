@@ -2,7 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
 import { User } from 'src/modules/user/models/user.model';
 import { ChatRoom } from './chatroom.model';
-import { MSGDeleteType } from '../enums/type.lib';
+import { MessageType, MSGDeleteType } from '../enums/type.lib';
 import { MediaFormat, MediaType } from 'src/common/enums/messaging.enum';
 
 export type MessageDocument = HydratedDocument<Message>;
@@ -62,6 +62,9 @@ export class Message {
 
     @Prop({ required: true, type: Array<MongooseSchema.Types.ObjectId>, ref: 'ChatRoom' })
     roomsForwardedTo: Array<ChatRoom>;
+
+    @Prop({ required: true, default: MessageType.NORMAL })
+    type: MessageType;
 
     @Prop({ required: true })
     message: MSGSchema;

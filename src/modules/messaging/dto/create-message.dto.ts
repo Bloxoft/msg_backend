@@ -1,3 +1,4 @@
+import { MessageType } from '../enums/type.lib';
 import { EmojiReactionSchema, Message, MSGDeleteSchema, MSGSchema } from './../models/message.model';
 import { IsArray, IsNotEmpty, IsObject, IsOptional, IsString, IsUrl } from "class-validator";
 
@@ -5,6 +6,10 @@ export class CreateMessageDto {
     @IsString()
     @IsNotEmpty()
     chatroomId: string;
+
+    @IsString()
+    @IsOptional()
+    type: MessageType;
 
     @IsObject()
     @IsNotEmpty()
