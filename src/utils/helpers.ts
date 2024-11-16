@@ -62,19 +62,19 @@ export class Hasher {
 }
 
 export class Encryptor {
-    decrypt(cipher: string, key: string = ENCRYPTION_KEY) {
+    decrypt(cipher: string, key: string = ENCRYPTION_KEY): string {
         const bytes = CryptoJS.AES.decrypt(cipher, key);
         const originalText = bytes.toString(CryptoJS.enc.Utf8);
 
         return originalText;
     }
-    encryptor(text: string, key: string = ENCRYPTION_KEY) {
+    encryptor(text: string, key: string = ENCRYPTION_KEY): string {
         const ciphertext = CryptoJS.AES.encrypt(text, key);
-        return ciphertext;
+        return ciphertext.toString();
     }
 
     createEncryptionKey(): string {
-        const concatenatedKey = new Encryptor().encryptor('rooms-encryptor', '').toString();
+        const concatenatedKey = new Encryptor().encryptor('encryptor').toString();
         return concatenatedKey;
     }
 }

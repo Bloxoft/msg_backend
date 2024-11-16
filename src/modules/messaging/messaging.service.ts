@@ -10,6 +10,9 @@ import { RoomType } from './enums/type.lib';
 import { Encryptor } from 'src/utils/helpers';
 import { CreateMessageDto } from './dto/create-message.dto';
 import { Profile } from '../user/models/profile.model';
+import { v4 as uuidv4 } from 'uuid';
+import { logger } from 'src/common/helpers/logger.lib';
+
 
 @Injectable()
 export class MessagingService {
@@ -21,14 +24,17 @@ export class MessagingService {
 
   // chatroom services
   async createChatroom(data: CreateChatroomDto, userId: string) {
-    const membersList = _.concat(data.members, userId);
+    const membersList = _.uniq(_.concat(data.members, userId));
+    const encryptorClass = new Encryptor();
+    const mainKey = uuidv4();
+    const roomEncryptionKey = encryptorClass.encryptor(mainKey)
+
     const findExistingRoom = await this.chatroomModel.findOne({ members: membersList })
     if (data.type == RoomType.P2P) {
       if (findExistingRoom) {
         throw new HttpException('Chatroom already exists', HttpStatus.CONFLICT)
       }
     }
-    const roomEncryptionKey = new Encryptor().encryptor(new Encryptor().createEncryptionKey()).toString()
 
     const saveChatroom = await this.chatroomModel.create({
       ...data,
@@ -45,9 +51,8 @@ export class MessagingService {
 
     const chatroomsData = await Promise.all(allUserRooms.map(async (room) => {
       const encryptorClass = new Encryptor();
-      const roomEncryptionKey = encryptorClass.decrypt(room.encryptionSecretKey.toString())
+      const roomEncryptionKey = encryptorClass.decrypt(room.encryptionSecretKey)
 
-      // const allMembers = room.members.map(member => member.toString())
       let otherMemberProfile: Profile;
       if (room.type === RoomType.P2P) {
         otherMemberProfile = await this.userService.findOneProfile({ userId: userId })
@@ -81,14 +86,13 @@ export class MessagingService {
       throw new NotFoundException('Chatroom not found')
     }
     const encryptorClass = new Encryptor();
-    const roomEncryptionKey = encryptorClass.decrypt(getChatroom.encryptionSecretKey.toString())
+    const roomEncryptionKey = encryptorClass.decrypt(getChatroom.encryptionSecretKey)
 
     let otherMemberProfile: Profile;
     if (getChatroom.type === RoomType.P2P) {
       otherMemberProfile = await this.userService.findOneProfile({ userId: getChatroom.creatorUserId })
     }
     const fetchLastMessage = await this.messageModel.findOne({ chatroomId: getChatroom._id }).sort('-created_at');
-
     const unreadMsgCount = await this.messageModel.countDocuments({ readBy: { $elemMatch: { $ne: getChatroom.creatorUserId } }, chatroomId: getChatroom._id, authorId: { $ne: getChatroom.creatorUserId } })
     return {
       message: 'Chatroom fetched!', data: {
@@ -123,13 +127,14 @@ export class MessagingService {
     }
 
     const encryptorClass = new Encryptor();
-    const roomEncryptionKey = encryptorClass.decrypt(getChatroom.encryptionSecretKey.toString())
+    const roomEncryptionKey = encryptorClass.decrypt(getChatroom.encryptionSecretKey)
+
     const formattedMessage = {
       ...data.message,
-      text: (data.message.text != null && data.message.text.length > 0) ? encryptorClass.encryptor(data.message.text, roomEncryptionKey) : '',
+      text: (data.message.text != null && data.message.text.length > 0) ? encryptorClass.encryptor(data.message.text.toString(), roomEncryptionKey) : '',
       media: data.message.media != null ? {
         ...data.message.media,
-        mediaUrl: encryptorClass.encryptor(data.message.media.mediaUrl, roomEncryptionKey),
+        mediaUrl: encryptorClass.encryptor(data.message.media.mediaUrl.toString(), roomEncryptionKey),
       } : null
     }
 
