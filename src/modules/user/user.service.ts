@@ -43,6 +43,7 @@ export class UserService {
     const profilesFound: Contact[] = [];
     const userProfile = await this.profile.findOne({ userId })
     if (data.length > 0) {
+      const phoneIdsSaved: string[] = [];
       for (const contact of data) {
         let findProfile = await this.profile.findOne({ phoneNumberIntl: contact.phoneId })
         if (!findProfile) {
@@ -53,8 +54,9 @@ export class UserService {
           }
         }
 
-        if (findProfile && userProfile?.username != findProfile.username) {
-          profilesFound.push(new Contact(findProfile.phoneNumberIntl, findProfile.email, findProfile.avatarUrl, findProfile.username, getNameFromProfile(findProfile), findProfile.countryCode));
+        if (findProfile && !phoneIdsSaved.includes(findProfile.phoneNumberIntl)) {
+          phoneIdsSaved.push(findProfile.phoneNumberIntl)
+          profilesFound.push(new Contact(findProfile.phoneNumberIntl, findProfile.email, findProfile.avatarUrl, findProfile.username, getNameFromProfile(findProfile), contact.deviceName, findProfile.countryCode));
         }
       }
     }

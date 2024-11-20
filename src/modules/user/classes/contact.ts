@@ -4,6 +4,7 @@ export class Contact {
     avatarUrl?: string;
     username?: string;
     fullName?: string;
+    deviceName?: string;
     countryISOCode?: string;
 
     constructor(
@@ -12,6 +13,7 @@ export class Contact {
         avatarUrl?: string,
         username?: string,
         fullName?: string,
+        deviceName?: string,
         countryISOCode?: string,
     ) {
         this.phoneId = phoneId;
@@ -19,6 +21,7 @@ export class Contact {
         this.avatarUrl = avatarUrl;
         this.username = username;
         this.fullName = fullName;
+        this.deviceName = deviceName;
         this.countryISOCode = countryISOCode;
     }
 }

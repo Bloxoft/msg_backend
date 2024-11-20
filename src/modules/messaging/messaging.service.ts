@@ -49,13 +49,20 @@ export class MessagingService {
   async findAllChatrooms(userId: string) {
     const allUserRooms = await this.chatroomModel.find({ members: { $elemMatch: { $eq: userId } } })
 
+
     const chatroomsData = await Promise.all(allUserRooms.map(async (room) => {
       const encryptorClass = new Encryptor();
       const roomEncryptionKey = encryptorClass.decrypt(room.encryptionSecretKey)
 
+      const allMembers = JSON.parse(JSON.stringify(room.members))
+
       let otherMemberProfile: Profile;
       if (room.type === RoomType.P2P) {
-        otherMemberProfile = await this.userService.findOneProfile({ userId: userId })
+        const otherMemberUserId = allMembers.filter((member: string) => {
+          return member != userId.toString();
+        })
+
+        otherMemberProfile = await this.userService.findOneProfile({ userId: otherMemberUserId })
       }
       const fetchLastMessage = await this.messageModel.findOne({ chatroomId: room._id }).sort('-created_at');
 
@@ -88,9 +95,14 @@ export class MessagingService {
     const encryptorClass = new Encryptor();
     const roomEncryptionKey = encryptorClass.decrypt(getChatroom.encryptionSecretKey)
 
+    const allMembers = JSON.parse(JSON.stringify(getChatroom.members))
+
     let otherMemberProfile: Profile;
     if (getChatroom.type === RoomType.P2P) {
-      otherMemberProfile = await this.userService.findOneProfile({ userId: getChatroom.creatorUserId })
+      const otherMemberUserId = allMembers.filter((member: string) => {
+        return member != getChatroom.creatorUserId.toString();
+      })
+      otherMemberProfile = await this.userService.findOneProfile({ userId: otherMemberUserId })
     }
     const fetchLastMessage = await this.messageModel.findOne({ chatroomId: getChatroom._id }).sort('-created_at');
     const unreadMsgCount = await this.messageModel.countDocuments({ readBy: { $elemMatch: { $ne: getChatroom.creatorUserId } }, chatroomId: getChatroom._id, authorId: { $ne: getChatroom.creatorUserId } })
