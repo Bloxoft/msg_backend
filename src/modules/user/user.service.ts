@@ -56,7 +56,7 @@ export class UserService {
 
         if (findProfile && !phoneIdsSaved.includes(findProfile.phoneNumberIntl)) {
           phoneIdsSaved.push(findProfile.phoneNumberIntl)
-          profilesFound.push(new Contact(findProfile.phoneNumberIntl, findProfile.email, findProfile.avatarUrl, findProfile.username, getNameFromProfile(findProfile), contact.deviceName, findProfile.countryCode));
+          profilesFound.push(new Contact(findProfile.userId.toString(), findProfile.phoneNumberIntl, findProfile.email, findProfile.avatarUrl, findProfile.username, getNameFromProfile(findProfile), contact.deviceName, findProfile.countryCode));
         }
       }
     }

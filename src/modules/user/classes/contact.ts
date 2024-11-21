@@ -1,4 +1,5 @@
 export class Contact {
+    userId: string;
     phoneId: string;
     email?: string;
     avatarUrl?: string;
@@ -8,6 +9,7 @@ export class Contact {
     countryISOCode?: string;
 
     constructor(
+        userId: string,
         phoneId: string,
         email?: string,
         avatarUrl?: string,
@@ -16,6 +18,7 @@ export class Contact {
         deviceName?: string,
         countryISOCode?: string,
     ) {
+        this.userId = userId;
         this.phoneId = phoneId;
         this.email = email;
         this.avatarUrl = avatarUrl;

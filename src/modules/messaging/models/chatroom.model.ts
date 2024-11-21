@@ -20,7 +20,7 @@ export class ChatRoomSettings {
 
 @Schema({ timestamps: true })
 export class ChatRoom {
-    @Prop({ required: true, type: Array<MongooseSchema.Types.ObjectId>, ref: 'User', minlength: 1 })
+    @Prop({ required: true, type: Array<MongooseSchema.Types.ObjectId>, ref: 'User', minlength: 2 })
     members: Array<User>;
 
     @Prop({ required: true, type: Array<MongooseSchema.Types.ObjectId>, ref: 'User', default: [] })

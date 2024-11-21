@@ -25,14 +25,22 @@ export class MessagingService {
   // chatroom services
   async createChatroom(data: CreateChatroomDto, userId: string) {
     const membersList = _.uniq(_.concat(data.members, userId));
+    if (membersList.length == 1) {
+      membersList.push(membersList[0])
+    }
     const encryptorClass = new Encryptor();
     const mainKey = uuidv4();
     const roomEncryptionKey = encryptorClass.encryptor(mainKey)
 
-    const findExistingRoom = await this.chatroomModel.findOne({ members: membersList })
+    const findExistingRoom = await this.chatroomModel.findOne({ members: { $all: membersList } })
     if (data.type == RoomType.P2P) {
       if (findExistingRoom) {
-        throw new HttpException('Chatroom already exists', HttpStatus.CONFLICT)
+        return {
+          message: 'Chatroom already exists!', data: {
+            ...findExistingRoom.toObject(),
+            encryptionSecretKey: mainKey
+          }
+        };
       }
     }
 
@@ -43,7 +51,12 @@ export class MessagingService {
       creatorUserId: userId
     })
 
-    return { message: 'Chatroom successfully created!', data: saveChatroom };
+    return {
+      message: 'Chatroom successfully created!', data: {
+        ...saveChatroom.toObject(),
+        encryptionSecretKey: mainKey
+      }
+    };
   }
 
   async findAllChatrooms(userId: string) {
@@ -54,7 +67,7 @@ export class MessagingService {
       const encryptorClass = new Encryptor();
       const roomEncryptionKey = encryptorClass.decrypt(room.encryptionSecretKey)
 
-      const allMembers = JSON.parse(JSON.stringify(room.members))
+      const allMembers: string[] = JSON.parse(JSON.stringify(room.members))
 
       let otherMemberProfile: Profile;
       if (room.type === RoomType.P2P) {
@@ -62,7 +75,11 @@ export class MessagingService {
           return member != userId.toString();
         })
 
-        otherMemberProfile = await this.userService.findOneProfile({ userId: otherMemberUserId })
+        if (otherMemberUserId.length === 0) {
+          otherMemberUserId[0] = userId;
+        }
+
+        otherMemberProfile = await this.userService.findOneProfile({ userId: otherMemberUserId[0] })
       }
       const fetchLastMessage = await this.messageModel.findOne({ chatroomId: room._id }).sort('-created_at');
 
