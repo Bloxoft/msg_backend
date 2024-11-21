@@ -32,13 +32,30 @@ export class MessagingService {
     const mainKey = uuidv4();
     const roomEncryptionKey = encryptorClass.encryptor(mainKey)
 
-    const findExistingRoom = await this.chatroomModel.findOne({ members: { $all: membersList } })
+    const findExistingRoom = await this.chatroomModel.findOne({ members: { $eq: membersList.sort() } })
+
+    let otherMemberProfile: Profile;
     if (data.type == RoomType.P2P) {
+      const otherMemberUserId = membersList.filter((member: string) => {
+        return member != userId.toString();
+      })
+
+      if (otherMemberUserId.length === 0) {
+        otherMemberUserId[0] = userId;
+      }
+
+      otherMemberProfile = await this.userService.findOneProfile({ userId: otherMemberUserId[0] })
       if (findExistingRoom) {
         return {
           message: 'Chatroom already exists!', data: {
             ...findExistingRoom.toObject(),
-            encryptionSecretKey: mainKey
+            encryptionSecretKey: mainKey,
+            metadata: {
+              otherMember: otherMemberProfile,
+              roomName: findExistingRoom.roomName,
+              roomDescription: findExistingRoom.roomDescription,
+              roomLogo: findExistingRoom.roomLogo,
+            }
           }
         };
       }
@@ -46,15 +63,22 @@ export class MessagingService {
 
     const saveChatroom = await this.chatroomModel.create({
       ...data,
-      members: membersList,
+      members: membersList.sort(),
       encryptionSecretKey: roomEncryptionKey,
-      creatorUserId: userId
+      creatorUserId: userId,
+
     })
 
     return {
       message: 'Chatroom successfully created!', data: {
         ...saveChatroom.toObject(),
-        encryptionSecretKey: mainKey
+        encryptionSecretKey: mainKey,
+        metadata: {
+          otherMember: otherMemberProfile,
+          roomName: findExistingRoom.roomName,
+          roomDescription: findExistingRoom.roomDescription,
+          roomLogo: findExistingRoom.roomLogo,
+        }
       }
     };
   }
