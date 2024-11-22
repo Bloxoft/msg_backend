@@ -75,9 +75,9 @@ export class MessagingService {
         encryptionSecretKey: mainKey,
         metadata: {
           otherMember: otherMemberProfile,
-          roomName: findExistingRoom.roomName,
-          roomDescription: findExistingRoom.roomDescription,
-          roomLogo: findExistingRoom.roomLogo,
+          roomName: saveChatroom.roomName,
+          roomDescription: saveChatroom.roomDescription,
+          roomLogo: saveChatroom.roomLogo,
         }
       }
     };
