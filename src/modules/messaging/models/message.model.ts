@@ -34,7 +34,7 @@ export class MSGSchema {
     text: string;
 
     @Prop({ required: true, type: MongooseSchema.Types.Boolean, default: false })
-    edited: Boolean;
+    edited: boolean;
 
     @Prop({ required: false, type: MongooseSchema.Types.Date })
     editedOn: Date;
@@ -60,7 +60,7 @@ export class Message {
     @Prop({ required: true, type: MongooseSchema.Types.ObjectId, ref: 'ChatRoom' })
     chatroomId: ChatRoom;
 
-    @Prop({ required: true, type: Array<MongooseSchema.Types.ObjectId>, ref: 'ChatRoom' })
+    @Prop({ required: true, type: Array<MongooseSchema.Types.ObjectId>, ref: 'ChatRoom', default: [] })
     roomsForwardedTo: Array<ChatRoom>;
 
     @Prop({ required: true, default: MessageType.NORMAL })

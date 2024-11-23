@@ -158,3 +158,17 @@ export function getNameFromProfile(profile: Profile): string | null {
         return name;
     } else null;
 }
+
+export function cleanObject(obj: any): any {
+    // remove all keys with undefined values in nested objects
+    const cleaned = Object.entries(obj).reduce((acc, [key, val]) => {
+        if (val && typeof val === 'object') {
+            val = cleanObject(val);
+        }
+        if (val !== undefined && val !== null) {
+            acc[key] = val;
+        }
+        return acc;
+    }, {});
+    return cleaned;
+}
