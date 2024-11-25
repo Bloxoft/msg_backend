@@ -105,7 +105,7 @@ export class MessagingService {
 
         otherMemberProfile = await this.userService.findOneProfile({ userId: otherMemberUserId[0] })
       }
-      const fetchLastMessage = await this.messageModel.findOne({ chatroomId: room._id }).sort('-created_at');
+      const fetchLastMessage = await this.messageModel.findOne({ chatroomId: room._id }).sort({ createdAt: -1 });
 
       const unreadMsgCount = await this.messageModel.countDocuments({ readBy: { $elemMatch: { $ne: userId } }, chatroomId: room._id, authorId: { $ne: userId } })
       return {
@@ -145,7 +145,7 @@ export class MessagingService {
       })
       otherMemberProfile = await this.userService.findOneProfile({ userId: otherMemberUserId })
     }
-    const fetchLastMessage = await this.messageModel.findOne({ chatroomId: getChatroom._id }).sort('-created_at');
+    const fetchLastMessage = await this.messageModel.findOne({ chatroomId: getChatroom._id }).sort({ createdAt: 1 });
     const unreadMsgCount = await this.messageModel.countDocuments({ readBy: { $elemMatch: { $ne: getChatroom.creatorUserId } }, chatroomId: getChatroom._id, authorId: { $ne: getChatroom.creatorUserId } })
     return {
       message: 'Chatroom fetched!', data: {
@@ -200,9 +200,14 @@ export class MessagingService {
     return { message: 'Message successfully created!', data: saveMessage };
   }
 
-  async findAllMessages(userId: string, roomId: string) {
-    const allUserMessages = await this.messageModel.find({ chatroomId: roomId, authorId: userId })
-    return { message: 'Message successfully fetched!', data: allUserMessages };
+  async findAllUserMessages(userId: string) {
+    const allUserMessages = await this.messageModel.find({ authorId: userId })
+    return { message: 'Messages successfully fetched!', data: allUserMessages };
+  }
+
+  async findAllChatroomMessages(userId: string, roomId: string) {
+    const allUserMessages = await this.messageModel.find({ chatroomId: roomId })
+    return { message: 'Messages successfully fetched!', data: allUserMessages };
   }
 
   async findMessageById(messageId: string) {

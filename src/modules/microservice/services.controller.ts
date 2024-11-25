@@ -35,7 +35,6 @@ export class ServicesController {
 
     @MessagePattern({ cmd: SubPattern.CREATE_MESSAGE })
     async onCreateMessageForChat(@Payload() payload: { userId: string, data: CreateMessageDto }): Promise<MicroserviceResponseType> {
-        console.log('it hits')
         try {
             const sanitized: CreateMessageDto = cleanObject(payload.data);
             const createMessage = await this.messagingService.createMessage(sanitized, payload.userId);

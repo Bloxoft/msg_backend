@@ -31,9 +31,24 @@ export class MessagingController {
     return this.messagingService.deleteChatrooom(id)
   }
 
+  @Get('chatroom/messages/:roomId')
+  findAllChatroomMessages(@Request() req, @Param('roomId') id: string) {
+    return this.messagingService.findAllChatroomMessages(req.user, id);
+  }
+
   // messaging service
   @Post('message')
   createMessage(@Body() data: CreateMessageDto, @Request() req) {
     return this.messagingService.createMessage(data, req.user);
+  }
+
+  // @Get('messages')
+  // findAllMessages(@Request() req) {
+  //   return this.messagingService.findAllUserMessages(req.user);
+  // }
+
+  @Get('message/:id')
+  findMessageById(@Param('id') id: string) {
+    return this.messagingService.findMessageById(id);
   }
 }
