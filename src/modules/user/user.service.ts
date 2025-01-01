@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { CreateProfileDto } from './dto/create-profile.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -119,6 +119,13 @@ export class UserService {
     if (data.uniqueData != null && data.uniqueData != undefined) {
       deviceToWorkWith.uniqueData = data.uniqueData
     }
+    if (data.loginTimestamp != null && data.loginTimestamp != undefined) {
+      const findUser = await this.user.findById(userId)
+      deviceToWorkWith.lastSessionTimestamp = data.loginTimestamp
+      deviceToWorkWith.userLoginTimestamp = data.loginTimestamp
+      deviceToWorkWith.lastSessionUser = findUser
+      deviceToWorkWith.activeUser = findUser
+    }
 
 
     const createdDevice = await deviceToWorkWith.save()
@@ -173,55 +180,60 @@ export class UserService {
     return { message: 'Device created', statusCode: 200, data: createdDevice }
   }
 
-  async removeUserFromDevice(deviceId: string, userId: string) {
-    const findExistingDevice = await this.device.findById(deviceId);
-
-    if (findExistingDevice) {
-      if (findExistingDevice.fcmTokens.length > 0 || findExistingDevice.subscribedFcmTopics.length > 0) {
-        findExistingDevice.activeUser = null;
-        findExistingDevice.userLoginTimestamp = null;
-
-        await findExistingDevice.save()
-      } else {
-        await findExistingDevice.deleteOne()
-      }
-
-      // update user device meta
-      const findExistingDevicesMeta = await this.devicesMeta.findOne({
-        userId: userId,
-      })
-
-      switch (findExistingDevice.platform) {
-        case DevicePlatformType.ANDROID:
-          _.remove(findExistingDevicesMeta.androidDevices, (val, index) => {
-            return val.toString() == findExistingDevice._id.toString()
-          })
-          break;
-        case DevicePlatformType.IOS:
-          _.remove(findExistingDevicesMeta.iosDevices, (val, index) => {
-            return val.toString() == findExistingDevice._id.toString()
-          })
-          break;
-        case DevicePlatformType.WEB:
-          _.remove(findExistingDevicesMeta.webDevices, (val, index) => {
-            return val.toString() == findExistingDevice._id.toString()
-          })
-          break;
-        case DevicePlatformType.MACOS:
-        case DevicePlatformType.WINDOWS:
-          _.remove(findExistingDevicesMeta.desktopDevices, (val, index) => {
-            return val.toString() == findExistingDevice._id.toString()
-          })
-          break;
-      }
-
-      if (findExistingDevicesMeta.totalActiveSessions > 0) {
-        findExistingDevicesMeta.totalActiveSessions -= 1
-      }
-
-      await findExistingDevicesMeta.save()
-
+  async removeUserFromDevice(devices: Array<string>, userId: string) {
+    // update user device meta
+    let findExistingDevicesMeta = await this.devicesMeta.findOne({
+      userId: userId,
+    })
+    if (!findExistingDevicesMeta) {
+      throw new NotFoundException('No device record found!')
     }
+    if (devices.length > 0) {
+      for (const deviceId of devices) {
+        const findExistingDevice = await this.device.findById(deviceId);
+
+        if (findExistingDevice) {
+          if (findExistingDevice.fcmTokens.length > 0 || findExistingDevice.subscribedFcmTopics.length > 0) {
+            findExistingDevice.activeUser = null;
+            findExistingDevice.userLoginTimestamp = null;
+
+            await findExistingDevice.save()
+          } else {
+            await findExistingDevice.deleteOne()
+          }
+
+          switch (findExistingDevice.platform) {
+            case DevicePlatformType.ANDROID:
+              _.remove(findExistingDevicesMeta.androidDevices, (val, index) => {
+                return val.toString() == findExistingDevice._id.toString()
+              })
+              break;
+            case DevicePlatformType.IOS:
+              _.remove(findExistingDevicesMeta.iosDevices, (val, index) => {
+                return val.toString() == findExistingDevice._id.toString()
+              })
+              break;
+            case DevicePlatformType.WEB:
+              _.remove(findExistingDevicesMeta.webDevices, (val, index) => {
+                return val.toString() == findExistingDevice._id.toString()
+              })
+              break;
+            case DevicePlatformType.MACOS:
+            case DevicePlatformType.WINDOWS:
+              _.remove(findExistingDevicesMeta.desktopDevices, (val, index) => {
+                return val.toString() == findExistingDevice._id.toString()
+              })
+              break;
+          }
+
+          if (findExistingDevicesMeta.totalActiveSessions > 0) {
+            findExistingDevicesMeta.totalActiveSessions -= 1
+          }
+        }
+        await findExistingDevicesMeta.save()
+      }
+    }
+
     return { message: 'Device session ended', statusCode: 200 }
   }
 

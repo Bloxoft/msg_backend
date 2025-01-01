@@ -3,6 +3,7 @@ import { UserService } from './user.service';
 import { AuthGuard } from '../authentication/authentication.guard';
 import { Contact } from './classes/contact';
 import { AddDeviceDto } from './dto/add-device.dto';
+import { RemoveMultipleDevicesDto } from './dto/remove-multiple-devices.dto';
 
 @Controller('user')
 export class UserController {
@@ -30,7 +31,12 @@ export class UserController {
   @UseGuards(AuthGuard)
   @Delete('device-mgt/remove/:deviceId')
   removeUserFromDevice(@Request() req, @Param('deviceId') id: string) {
-    return this.userService.removeUserFromDevice(id, req.user)
+    return this.userService.removeUserFromDevice([id], req.user)
+  }
+  @UseGuards(AuthGuard)
+  @Post('device-mgt/remove-multiple')
+  removeUMultipleUserSessionsFromDevices(@Request() req, @Body() data: RemoveMultipleDevicesDto) {
+    return this.userService.removeUserFromDevice(data.devices, req.user)
   }
 
 
