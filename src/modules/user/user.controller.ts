@@ -1,4 +1,5 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request } from '@nestjs/common';
+import { SaveUserLastSessionDto } from './dto/save-last-session.dto';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request, Put } from '@nestjs/common';
 import { UserService } from './user.service';
 import { AuthGuard } from '../authentication/authentication.guard';
 import { Contact } from './classes/contact';
@@ -44,6 +45,12 @@ export class UserController {
   @Get('device-mgt/validate-session/:deviceId')
   validateUserSession(@Request() req, @Param('deviceId') id: string) {
     return this.userService.validateDeviceSession(id, req.user)
+  }
+
+  @UseGuards(AuthGuard)
+  @Put('device-mgt/save-last-session')
+  SaveUserLastSession(@Request() req, @Body() data: SaveUserLastSessionDto) {
+    return this.userService.saveLastUserSession(data, req.user)
   }
 
 

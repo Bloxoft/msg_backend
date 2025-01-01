@@ -12,6 +12,7 @@ import { Device } from './models/device.model';
 import { UserDevicesMeta } from './models/user-devices-meta.model';
 import { DevicePlatformType } from './enums/type.lib';
 import { _ } from 'src/constant/variables.static';
+import { SaveUserLastSessionDto } from './dto/save-last-session.dto';
 
 @Injectable()
 export class UserService {
@@ -277,4 +278,18 @@ export class UserService {
 
     return { message: 'Device session validation successful', statusCode: 200, data: { isSessionValid: sessionValidated } }
   }
+
+  async saveLastUserSession(data: SaveUserLastSessionDto, userId: string) {
+    const findExistingDevice = await this.device.findById(data.deviceId);
+    if (!findExistingDevice) {
+      throw new NotFoundException('No device found!')
+    }
+
+    const findUser = await this.user.findById(userId)
+
+    findExistingDevice.lastSessionTimestamp = data.timestamp;
+    findExistingDevice.lastSessionUser = findUser;
+    return { message: 'Device session saved successfully', statusCode: 200 }
+  }
 }
+
