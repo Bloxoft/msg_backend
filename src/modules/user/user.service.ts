@@ -11,7 +11,7 @@ import { AddDeviceDto } from './dto/add-device.dto';
 import { Device } from './models/device.model';
 import { UserDevicesMeta } from './models/user-devices-meta.model';
 import { DevicePlatformType } from './enums/type.lib';
-import _ from 'lodash';
+import { _ } from 'src/constant/variables.static';
 
 @Injectable()
 export class UserService {
@@ -86,6 +86,7 @@ export class UserService {
   }
 
 
+
   // device management
   async addOrUpdateDevice(data: AddDeviceDto, userId: string) {
     const findExistingDevice = await this.device.findOne({
@@ -150,24 +151,24 @@ export class UserService {
 
     switch (data.platform) {
       case DevicePlatformType.ANDROID:
-        if (!metaDocToWorkWith.androidDevices.includes(createdDevice)) {
-          metaDocToWorkWith.androidDevices.push(createdDevice)
+        if (!metaDocToWorkWith.androidDevices.includes(createdDevice._id)) {
+          metaDocToWorkWith.androidDevices.push(createdDevice._id)
         }
         break;
       case DevicePlatformType.IOS:
-        if (!metaDocToWorkWith.iosDevices.includes(createdDevice)) {
-          metaDocToWorkWith.iosDevices.push(createdDevice)
+        if (!metaDocToWorkWith.iosDevices.includes(createdDevice._id)) {
+          metaDocToWorkWith.iosDevices.push(createdDevice._id)
         }
         break;
       case DevicePlatformType.WEB:
-        if (!metaDocToWorkWith.webDevices.includes(createdDevice)) {
-          metaDocToWorkWith.webDevices.push(createdDevice)
+        if (!metaDocToWorkWith.webDevices.includes(createdDevice._id)) {
+          metaDocToWorkWith.webDevices.push(createdDevice._id)
         }
         break;
       case DevicePlatformType.MACOS:
       case DevicePlatformType.WINDOWS:
-        if (!metaDocToWorkWith.desktopDevices.includes(createdDevice)) {
-          metaDocToWorkWith.desktopDevices.push(createdDevice)
+        if (!metaDocToWorkWith.desktopDevices.includes(createdDevice._id)) {
+          metaDocToWorkWith.desktopDevices.push(createdDevice._id)
         }
         break;
     }
@@ -182,7 +183,7 @@ export class UserService {
 
   async removeUserFromDevice(devices: Array<string>, userId: string) {
     // update user device meta
-    let findExistingDevicesMeta = await this.devicesMeta.findOne({
+    const findExistingDevicesMeta = await this.devicesMeta.findOne({
       userId: userId,
     })
     if (!findExistingDevicesMeta) {
@@ -204,34 +205,36 @@ export class UserService {
 
           switch (findExistingDevice.platform) {
             case DevicePlatformType.ANDROID:
-              _.remove(findExistingDevicesMeta.androidDevices, (val, index) => {
-                return val.toString() == findExistingDevice._id.toString()
+
+              findExistingDevicesMeta.androidDevices = _.filter(findExistingDevicesMeta.androidDevices, (val, index) => {
+                return val.toString() != findExistingDevice._id.toString()
               })
               break;
             case DevicePlatformType.IOS:
-              _.remove(findExistingDevicesMeta.iosDevices, (val, index) => {
-                return val.toString() == findExistingDevice._id.toString()
+              findExistingDevicesMeta.androidDevices = _.filter(findExistingDevicesMeta.iosDevices, (val, index) => {
+                return val.toString() != findExistingDevice._id.toString()
               })
               break;
             case DevicePlatformType.WEB:
-              _.remove(findExistingDevicesMeta.webDevices, (val, index) => {
-                return val.toString() == findExistingDevice._id.toString()
+              findExistingDevicesMeta.androidDevices = _.filter(findExistingDevicesMeta.webDevices, (val, index) => {
+                return val.toString() != findExistingDevice._id.toString()
               })
               break;
             case DevicePlatformType.MACOS:
             case DevicePlatformType.WINDOWS:
-              _.remove(findExistingDevicesMeta.desktopDevices, (val, index) => {
-                return val.toString() == findExistingDevice._id.toString()
+              findExistingDevicesMeta.androidDevices = _.filter(findExistingDevicesMeta.desktopDevices, (val, index) => {
+                return val.toString() != findExistingDevice._id.toString()
               })
               break;
           }
+
 
           if (findExistingDevicesMeta.totalActiveSessions > 0) {
             findExistingDevicesMeta.totalActiveSessions -= 1
           }
         }
-        await findExistingDevicesMeta.save()
       }
+      const saveMeta = await findExistingDevicesMeta.save();
     }
 
     return { message: 'Device session ended', statusCode: 200 }
@@ -249,23 +252,23 @@ export class UserService {
     if (findExistingDevice && findExistingDevicesMeta && findExistingDevice.activeUser.toString() == userId && findExistingDevice.userLoginTimestamp && findExistingDevicesMeta.totalActiveSessions > 0) {
       switch (findExistingDevice.platform) {
         case DevicePlatformType.ANDROID:
-          if (findExistingDevicesMeta.androidDevices.includes(findExistingDevice)) {
+          if (findExistingDevicesMeta.androidDevices.includes(findExistingDevice._id)) {
             sessionValidated = true;
           }
           break;
         case DevicePlatformType.IOS:
-          if (findExistingDevicesMeta.iosDevices.includes(findExistingDevice)) {
+          if (findExistingDevicesMeta.iosDevices.includes(findExistingDevice._id)) {
             sessionValidated = true;
           }
           break;
         case DevicePlatformType.WEB:
-          if (findExistingDevicesMeta.webDevices.includes(findExistingDevice)) {
+          if (findExistingDevicesMeta.webDevices.includes(findExistingDevice._id)) {
             sessionValidated = true;
           }
           break;
         case DevicePlatformType.MACOS:
         case DevicePlatformType.WINDOWS:
-          if (findExistingDevicesMeta.desktopDevices.includes(findExistingDevice)) {
+          if (findExistingDevicesMeta.desktopDevices.includes(findExistingDevice._id)) {
             sessionValidated = true;
           }
           break;

@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument, Schema as MongooseSchema } from 'mongoose'; // Rename mongoose Schema
+import { HydratedDocument, Schema as MongooseSchema, Types } from 'mongoose'; // Rename mongoose Schema
 import { User } from './user.model';
 import { Device } from './device.model';
 
@@ -11,16 +11,16 @@ export class UserDevicesMeta {
     userId: User;
 
     @Prop({ required: true, maxlength: 5, type: Array<MongooseSchema.Types.ObjectId>, ref: 'Device', default: [] })
-    androidDevices: Array<Device>;
+    androidDevices: Array<Types.ObjectId>;
 
     @Prop({ required: true, maxlength: 5, type: Array<MongooseSchema.Types.ObjectId>, ref: 'Device', default: [] })
-    iosDevices: Array<Device>;
+    iosDevices: Array<Types.ObjectId>;
 
     @Prop({ required: true, maxlength: 5, type: Array<MongooseSchema.Types.ObjectId>, ref: 'Device', default: [] })
-    webDevices: Array<Device>;
+    webDevices: Array<Types.ObjectId>;
 
     @Prop({ required: true, maxlength: 5, type: Array<MongooseSchema.Types.ObjectId>, ref: 'Device', default: [] })
-    desktopDevices: Array<Device>;
+    desktopDevices: Array<Types.ObjectId>;
 
     @Prop({ required: true, default: 1, type: MongooseSchema.Types.Number })
     totalActiveSessions: number;
