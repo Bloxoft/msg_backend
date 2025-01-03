@@ -1,4 +1,5 @@
-import { HttpException, HttpStatus, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { NotificationFromMessageFormatter } from './functions/createNotificationsFromMessage.fx';
+import { HttpException, HttpStatus, Inject, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { CreateChatroomDto } from './dto/create-chatroom.dto';
 import { UserService } from '../user/user.service';
 import { InjectModel } from '@nestjs/mongoose';
@@ -8,18 +9,25 @@ import { Message } from './models/message.model';
 import { _ } from 'src/constant/variables.static';
 import { RoomType } from './enums/type.lib';
 import { Encryptor } from 'src/utils/helpers';
-import { CreateMessageDto } from './dto/create-message.dto';
+import { CreateMessageDto, CreateMessageDtoMessageData } from './dto/create-message.dto';
 import { Profile } from '../user/models/profile.model';
 import { v4 as uuidv4 } from 'uuid';
 import { logger } from 'src/common/helpers/logger.lib';
+import { MicroservicesName } from 'src/common/enums/microservices.enum';
+import { ClientProxy } from '@nestjs/microservices';
+import { NotifierSingleChannelMessageEvent } from 'src/common/events/notifier_service.event';
+import { MessageChannel } from 'src/common/enums/channels.enum';
+import { Device } from '../user/models/device.model';
 
 
 @Injectable()
 export class MessagingService {
   constructor(
-    private readonly userService: UserService,
+    @Inject(MicroservicesName.NOTIFIER) private notifier: ClientProxy,
     @InjectModel(ChatRoom.name) private chatroomModel: Model<ChatRoom>,
     @InjectModel(Message.name) private messageModel: Model<Message>,
+    @InjectModel(Device.name) private deviceModel: Model<Device>,
+    private readonly userService: UserService,
   ) { }
 
   // chatroom services
@@ -170,7 +178,7 @@ export class MessagingService {
 
 
   // messages services
-  async createMessage(data: CreateMessageDto, userId: string) {
+  async createMessage(data: CreateMessageDtoMessageData, userId: string, deviceId?: string) {
     const getChatroom = await this.chatroomModel.findById(data.chatroomId)
     if (!getChatroom) {
       throw new NotFoundException('Chatroom not found!')
@@ -178,6 +186,12 @@ export class MessagingService {
     if (getChatroom.members.map(member => member.toString()).includes(userId) == false) {
       throw new UnauthorizedException('Not a member of chatroom')
     }
+
+    const authorInfo = await this.userService.findOneProfile({ userId })
+    if (!authorInfo) {
+      throw new UnauthorizedException('Invalid Profile or User Credentials!')
+    }
+
 
     const encryptorClass = new Encryptor();
     const roomEncryptionKey = encryptorClass.decrypt(getChatroom.encryptionSecretKey)
@@ -196,6 +210,14 @@ export class MessagingService {
       authorId: userId,
       message: formattedMessage
     })
+
+    // send notifications to other members -- ✅
+    const pushNotificationFormatted = await new NotificationFromMessageFormatter(saveMessage, this.deviceModel, this.chatroomModel, roomEncryptionKey, authorInfo).push();
+    if (pushNotificationFormatted != null) {
+      let notifierEventData: NotifierSingleChannelMessageEvent = new NotifierSingleChannelMessageEvent(MessageChannel.PUSH, pushNotificationFormatted)
+      // - // send notification to required channel
+      this.notifier.emit('singleChannelMessage', notifierEventData)
+    }
 
     return { message: 'Message successfully created!', data: saveMessage };
   }

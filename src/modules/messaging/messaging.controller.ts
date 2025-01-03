@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request }
 import { MessagingService } from './messaging.service';
 import { CreateChatroomDto } from './dto/create-chatroom.dto';
 import { AuthGuard } from '../authentication/authentication.guard';
-import { CreateMessageDto } from './dto/create-message.dto';
+import { CreateMessageDto, CreateMessageDtoMessageData } from './dto/create-message.dto';
 
 @UseGuards(AuthGuard)
 @Controller('messaging-service')
@@ -38,7 +38,7 @@ export class MessagingController {
 
   // messaging service
   @Post('message')
-  createMessage(@Body() data: CreateMessageDto, @Request() req) {
+  createMessage(@Body() data: CreateMessageDtoMessageData, @Request() req) {
     return this.messagingService.createMessage(data, req.user);
   }
 

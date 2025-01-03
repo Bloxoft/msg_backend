@@ -1,8 +1,9 @@
 import { MessageType } from '../enums/type.lib';
-import { EmojiReactionSchema, Message, MSGDeleteSchema, MSGSchema } from './../models/message.model';
+import { EmojiReactionSchema, MSGDeleteSchema, MSGSchema } from './../models/message.model';
 import { IsArray, IsNotEmpty, IsObject, IsOptional, IsString, IsUrl } from "class-validator";
 
-export class CreateMessageDto {
+
+export class CreateMessageDtoMessageData {
     @IsString()
     @IsNotEmpty()
     chatroomId: string;
@@ -42,4 +43,13 @@ export class CreateMessageDto {
     @IsString()
     @IsOptional()
     replyMessageText: string;
+}
+
+export class CreateMessageDto {
+    @IsString()
+    @IsOptional()
+    senderDeviceId?: string;
+
+    @IsObject()
+    messageData: CreateMessageDtoMessageData;
 }

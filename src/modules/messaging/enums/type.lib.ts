@@ -16,3 +16,7 @@ export enum MessageType {
     POLL = 'poll',
     DOCUMENT = 'document'
 }
+
+export enum PushNotificationType {
+    MESSAGE = 'message',
+}

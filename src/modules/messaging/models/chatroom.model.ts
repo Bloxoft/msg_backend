@@ -44,6 +44,9 @@ export class ChatRoom {
     @Prop({ required: false })
     roomDescription: string;
 
+    @Prop({ required: true, type: MongooseSchema.Types.String, default: "token" })
+    notificationType: 'token' | 'topic';
+
     @Prop({ required: false, type: MongooseSchema.Types.ObjectId, ref: 'User' })
     creatorUserId: User;
 

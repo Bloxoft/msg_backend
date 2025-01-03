@@ -159,6 +159,9 @@ export function getNameFromProfile(profile: Profile): string | null {
     } else null;
 }
 
+export function getNameOrUsernameFromProfile(profile: Profile, mergeEmailSymbol: boolean = true): string {
+    return getNameFromProfile(profile) != null ? getNameFromProfile(profile) : `${mergeEmailSymbol ? '@' : ''}${profile.username}`
+}
 export function cleanObject(obj: any): any {
     // remove all keys with undefined values in nested objects
     const cleaned = Object.entries(obj).reduce((acc, [key, val]) => {

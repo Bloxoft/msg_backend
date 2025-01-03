@@ -37,8 +37,11 @@ export class ServicesController {
     async onCreateMessageForChat(@Payload() payload: { userId: string, data: CreateMessageDto }): Promise<MicroserviceResponseType> {
         try {
             const sanitized: CreateMessageDto = cleanObject(payload.data);
-            const createMessage = await this.messagingService.createMessage(sanitized, payload.userId);
-            return new MicroserviceResponseType(true, createMessage.message, createMessage.data);
+            const createMessage = await this.messagingService.createMessage(sanitized.messageData, payload.userId);
+            return new MicroserviceResponseType(true, createMessage.message, {
+                sendFrom: sanitized.senderDeviceId,
+                messageData: createMessage.data
+            });
         } catch (error) {
             return new MicroserviceResponseType(false, error.message, error)
         }

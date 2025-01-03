@@ -4,10 +4,11 @@ import { ServicesController } from "./services.controller";
 import { MongoModels } from "../shared/mongo-models.module";
 import { MessagingService } from "../messaging/messaging.service";
 import { UserService } from "../user/user.service";
+import { Microservices } from "../shared/microservice.module";
 
 @Module({
-    imports: [MongoModels],
+    imports: [MongoModels, Microservices],
     controllers: [ServicesController],
-    providers: [MicroserviceService, MessagingService, UserService],
+    providers: [MessagingService, UserService, MicroserviceService],
 })
 export class ServicesModule { }
