@@ -47,18 +47,20 @@ export class NotificationFromMessageFormatter {
         } else usesToken = false;
         const formattedAuthorInfo = _.create(this.authorProfile)
         delete formattedAuthorInfo.availableVerificationChannel
-        return new PushNotificationMessage({
-            topic: !usesToken ? messageChatroom.toString() : null,
-            tokens: usesToken ? secureTokens : null,
-            usesTopic: !usesToken,
-            notification: {
-                title: getNameOrUsernameFromProfile(this._authorProfile),
-                body: this.encryptorClass.decrypt(this._message.message.text, this.decryptionKey)
-            },
-            data: {
-                "notificationType": PushNotificationType.MESSAGE,
-                "authorInfo": JSON.stringify(formattedAuthorInfo)
-            }
-        })
+
+        return (usesToken && secureTokens.length > 0) || (!usesToken)
+            ? new PushNotificationMessage({
+                topic: !usesToken ? `chatroom-${messageChatroom._id.toString()}` : null,
+                tokens: usesToken ? secureTokens : null,
+                usesTopic: !usesToken,
+                notification: {
+                    title: getNameOrUsernameFromProfile(this._authorProfile),
+                    body: this.encryptorClass.decrypt(this._message.message.text, this.decryptionKey)
+                },
+                data: {
+                    "notificationType": PushNotificationType.MESSAGE,
+                    "authorInfo": JSON.stringify(formattedAuthorInfo)
+                }
+            }) : null
     }
 }
