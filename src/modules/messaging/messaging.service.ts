@@ -196,9 +196,12 @@ export class MessagingService {
     const encryptorClass = new Encryptor();
     const roomEncryptionKey = encryptorClass.decrypt(getChatroom.encryptionSecretKey)
 
+    const decryptedMessageText: string | null = (data.message.text != null && data.message.text.length > 0) ? encryptorClass.decrypt(data.message.text.toString(), roomEncryptionKey) : null
+
+
     const formattedMessage = {
       ...data.message,
-      text: (data.message.text != null && data.message.text.length > 0) ? encryptorClass.encryptor(data.message.text.toString(), roomEncryptionKey) : '',
+      text: (decryptedMessageText != null && decryptedMessageText.length > 0) ? encryptorClass.encryptor(decryptedMessageText, roomEncryptionKey) : '',
       media: data.message.media != null ? {
         ...data.message.media,
         mediaUrl: encryptorClass.encryptor(data.message.media.mediaUrl.toString(), roomEncryptionKey),
